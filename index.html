@@ -99,6 +99,23 @@
             background-color: #45a049;
             border-radius: 4px;
         }
+        .language-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .language-buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .language-buttons button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +126,16 @@
         <a href="#">Services</a>
         <a href="#">Contact</a>
     </nav>
+
+    <!-- Language Buttons -->
+    <div class="language-buttons">
+        <button onclick="translatePage('en')">English</button>
+        <button onclick="translatePage('he')">עברית</button>
+        <button onclick="translatePage('es')">Español</button>
+        <button onclick="translatePage('it')">Italiano</button>
+        <button onclick="translatePage('ru')">Русский</button>
+        <button onclick="translatePage('ar')">العربية</button>
+    </div>
 
     <!-- Google Translate Element -->
     <div id="google_translate_element"></div>
@@ -121,17 +148,8 @@
                 autoDisplay: false
             }, 'google_translate_element');
         }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    <!-- No JavaScript Notice -->
-    <noscript>
-        <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-
-    <!-- Vue App -->
-    <div id="app"></div>
-    <script src="static/js/chunk-vendors.111f4aba.js"></script>
-    <script src="static/js/app.36323100.js"></script>
-</body>
-</html>
+        function translatePage(language) {
+            var frame = document.querySelector('iframe.goog-te-menu-frame');
+            if (!frame) {
+                alert('Google Translate
