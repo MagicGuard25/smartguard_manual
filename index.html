@@ -81,17 +81,9 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        nav {
-            background-color: #4CAF50;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            margin-top: 20px;
-        }
         .language-buttons {
             text-align: center;
-            margin-top: 20px;
+            margin: 20px;
         }
         .language-buttons button {
             margin: 5px;
@@ -109,7 +101,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation Menu Replaced with Language Buttons -->
+    <!-- Language Buttons -->
     <div class="language-buttons">
         <button onclick="translatePage('en')">English</button>
         <button onclick="translatePage('he')">עברית</button>
@@ -126,11 +118,27 @@
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
                 includedLanguages: 'en,he,es,it,ru,ar',
-                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
-                autoDisplay: false
+                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
             }, 'google_translate_element');
         }
 
         function translatePage(language) {
             var frame = document.querySelector('iframe.goog-te-menu-frame');
-            if (!frame) {
+            if (frame) {
+                var frameDoc = frame.contentDocument || frame.contentWindow.document;
+                var langButton = frameDoc.querySelector(`[value="${language}"]`);
+                if (langButton) {
+                    langButton.click();
+                } else {
+                    alert('Language not available: ' + language);
+                }
+            } else {
+                alert('Google Translate frame not available. Please wait for the page to load fully.');
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Vue App -->
+    <div id="app"></div>
+    <script src="static/js/chunk-vendors.111f4aba.js"></script
