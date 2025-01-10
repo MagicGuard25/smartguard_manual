@@ -86,7 +86,8 @@
             overflow: hidden;
             display: flex;
             justify-content: center;
-            padding: 10px;
+            padding: 20px;
+            margin-top: 20px;
         }
         nav a {
             color: white;
@@ -116,7 +117,8 @@
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
                 includedLanguages: 'en,he,es,it,ru,ar',
-                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+                autoDisplay: false
             }, 'google_translate_element');
         }
     </script>
