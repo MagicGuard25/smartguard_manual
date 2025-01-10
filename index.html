@@ -89,16 +89,6 @@
             padding: 20px;
             margin-top: 20px;
         }
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            font-size: 18px;
-        }
-        nav a:hover {
-            background-color: #45a049;
-            border-radius: 4px;
-        }
         .language-buttons {
             text-align: center;
             margin-top: 20px;
@@ -119,15 +109,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation Menu -->
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Contact</a>
-    </nav>
-
-    <!-- Language Buttons -->
+    <!-- Navigation Menu Replaced with Language Buttons -->
     <div class="language-buttons">
         <button onclick="translatePage('en')">English</button>
         <button onclick="translatePage('he')">עברית</button>
@@ -152,4 +134,3 @@
         function translatePage(language) {
             var frame = document.querySelector('iframe.goog-te-menu-frame');
             if (!frame) {
-                alert('Google Translate
