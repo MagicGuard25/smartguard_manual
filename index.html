@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
+    
+    <!-- Prefetch links -->
     <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
     <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
     <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
@@ -51,29 +53,58 @@
     <link href="static/js/chunk-e11b8b12.b18dc983.js" rel="prefetch">
     <link href="static/js/chunk-e6f2f230.8084a38d.js" rel="prefetch">
     <link href="static/js/chunk-ec85e9da.2b79db67.js" rel="prefetch">
+    
+    <!-- Preload and stylesheet links -->
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
     <link href="static/js/app.36323100.js" rel="preload" as="script">
     <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
+
+    <!-- Custom Styling for Language Selector -->
+    <style>
+        #google_translate_element {
+            margin: 20px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        #google_translate_element select {
+            font-size: 16px;
+            color: #333;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div id="google_translate_element" style="margin: 20px; text-align: center; font-family: Arial, sans-serif;"></div>
+    <!-- Google Translate Element -->
+    <div id="google_translate_element"></div>
     <script type="text/javascript">
         function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,he,es,it,ru,ar',
-                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
-            }, 'google_translate_element');
+            if (!window.google || !window.google.translate) {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,he,es,it,ru,ar',
+                    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+                }, 'google_translate_element');
+            }
         }
     </script>
     <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
+    <!-- No JavaScript Notice -->
     <noscript>
         <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
+
+    <!-- Vue App -->
     <div id="app"></div>
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
