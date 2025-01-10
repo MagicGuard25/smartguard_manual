@@ -81,9 +81,34 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        nav {
+            background-color: #4CAF50;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        nav a:hover {
+            background-color: #45a049;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation Menu -->
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+
     <!-- Google Translate Element -->
     <div id="google_translate_element"></div>
     <script type="text/javascript">
