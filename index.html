@@ -9,51 +9,37 @@
     <title>vue3</title>
 
     <!-- קבצי CSS -->
-    <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
-    <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
-    <link href="static/css/chunk-06c6c55e.6477bd25.css" rel="prefetch">
-    <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
-    <link href="static/css/chunk-1176cb8e.7dbc7ae3.css" rel="prefetch">
-    <link href="static/css/chunk-12fd5eba.a21c779c.css" rel="prefetch">
-    <link href="static/css/chunk-5e572502.5e6bdd68.css" rel="prefetch">
-    <link href="static/css/chunk-70060db0.f6631c2e.css" rel="prefetch">
-    <link href="static/css/chunk-7398b612.c4a0cd01.css" rel="prefetch">
-    <link href="static/css/chunk-7b72ac9b.571863c7.css" rel="prefetch">
-    <link href="static/css/chunk-8b345fa4.5e4e8562.css" rel="prefetch">
-    <link href="static/css/chunk-8f7e9f0a.4125a708.css" rel="prefetch">
-    <link href="static/css/chunk-9eebefec.e4d0a342.css" rel="prefetch">
-    <link href="static/css/chunk-a21946ae.bb600696.css" rel="prefetch">
-    <link href="static/css/chunk-a7c4b1c0.826d02ca.css" rel="prefetch">
-    <link href="static/css/chunk-c008c720.c312a51e.css" rel="prefetch">
-    <link href="static/css/chunk-c61f00f2.51283979.css" rel="prefetch">
-    <link href="static/css/chunk-c6baff6a.b0b4aff2.css" rel="prefetch">
-    <link href="static/css/chunk-c7934cbc.3cd793e9.css" rel="prefetch">
-    <link href="static/css/chunk-e11b8b12.c49fe662.css" rel="prefetch">
-    <link href="static/css/chunk-e6f2f230.950fdf7a.css" rel="prefetch">
-    <link href="static/css/chunk-ec85e9da.15134b5c.css" rel="prefetch">
-    <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
-    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
     <style>
         #toggleMenu {
             position: fixed;
-            top: 10px;
-            right: 55px;
+            top: 50px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
             background: #333;
             color: white;
             border: none;
-            border-radius: 20px;
-            padding: 8px 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             z-index: 1001;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        #toggleMenu.draggable {
+            position: absolute;
         }
 
         #languageMenu {
             position: fixed;
-            top: 50px;
+            top: 110px;
             right: 20px;
             background: white;
             border: 1px solid #ccc;
@@ -117,7 +103,7 @@
         <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
-    <button id="toggleMenu">Language</button>
+    <button id="toggleMenu">EN</button>
     <div id="languageMenu">
         <button class="langButton" data-lang="en">English</button>
         <button class="langButton" data-lang="he">עברית</button>
@@ -182,6 +168,7 @@
                 button.addEventListener('click', async () => {
                     const lang = button.dataset.lang;
                     currentLanguage = lang;
+                    document.getElementById('toggleMenu').textContent = lang.toUpperCase();
                     toggleLanguageMenu();
                     await translatePage(lang);
                 });
@@ -209,10 +196,35 @@
             menu.classList.toggle('show');
         }
 
+        function makeButtonDraggable() {
+            const button = document.getElementById('toggleMenu');
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            button.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - button.getBoundingClientRect().left;
+                offsetY = e.clientY - button.getBoundingClientRect().top;
+                button.classList.add('draggable');
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                button.style.left = `${e.clientX - offsetX}px`;
+                button.style.top = `${e.clientY - offsetY}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                button.classList.remove('draggable');
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
             observeDomChanges();
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
+            makeButtonDraggable();
             translatePage(currentLanguage);
         });
     </script>
