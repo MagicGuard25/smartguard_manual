@@ -3,8 +3,16 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Translation</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
+    <link rel="icon" href="favicon.ico">
+    <title>vue3</title>
+
+    <!-- קישורי CSS -->
+    <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
+    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
+    <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
+    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
+
     <style>
         /* עיצוב חלונית בחירת השפה */
         #languageMenu {
@@ -70,7 +78,10 @@
     </style>
 </head>
 <body>
+    <!-- כפתור לפתיחת חלונית השפות -->
     <button id="toggleMenu">בחר שפה</button>
+
+    <!-- חלונית בחירת שפה -->
     <div id="languageMenu">
         <button class="langButton" data-lang="en">English</button>
         <button class="langButton" data-lang="he">עברית</button>
@@ -78,30 +89,34 @@
         <button class="langButton" data-lang="it">Italiano</button>
         <button class="langButton" data-lang="es">Español</button>
     </div>
+
+    <!-- אינדיקטור טעינה -->
     <div class="loading" id="loadingIndicator">מתרגם...</div>
 
+    <!-- תוכן -->
     <div id="app">
         <h1>Welcome to our website!</h1>
         <p>This is a sample page for demonstrating translation.</p>
     </div>
 
+    <!-- קבצי JavaScript -->
+    <script src="static/js/chunk-vendors.111f4aba.js"></script>
+    <script src="static/js/app.36323100.js"></script>
+
     <script>
-        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף במפתח API תקין
+        const apiKey = 'YAIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף במפתח API תקין
         const translationCache = new Map();
         let currentLanguage = 'en';
 
-        // זיהוי שפת הדפדפן
         function detectBrowserLanguage() {
             return navigator.language || 'en';
         }
 
-        // פונקציה לפתיחת/סגירת חלונית השפות
         function toggleLanguageMenu() {
             const menu = document.getElementById('languageMenu');
             menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        // פונקציה לתרגום טקסט
         async function translateText(text, targetLang) {
             if (!text.trim() || translationCache.has(`${text}:${targetLang}`)) {
                 return translationCache.get(`${text}:${targetLang}`) || text;
@@ -126,7 +141,6 @@
             }
         }
 
-        // פונקציה לתרגום אלמנטים בדף
         async function translatePage(targetLang) {
             const loadingIndicator = document.getElementById('loadingIndicator');
             loadingIndicator.style.display = 'block';
@@ -141,7 +155,6 @@
             loadingIndicator.style.display = 'none';
         }
 
-        // שינוי שפה בלחיצה
         async function changeLanguage(lang) {
             if (lang === currentLanguage) return;
             currentLanguage = lang;
@@ -153,19 +166,17 @@
             await translatePage(lang);
         }
 
-        // אתחול חלונית בחירת השפה
         function setupLanguageButtons() {
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
 
             document.querySelectorAll('.langButton').forEach(button => {
                 button.addEventListener('click', async () => {
-                    toggleLanguageMenu(); // סגירת התפריט לאחר בחירה
+                    toggleLanguageMenu();
                     await changeLanguage(button.dataset.lang);
                 });
             });
         }
 
-        // תרגום אוטומטי בעת טעינת הדף
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageButtons();
             const browserLang = detectBrowserLanguage().split('-')[0];
