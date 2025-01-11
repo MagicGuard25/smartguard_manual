@@ -1,37 +1,57 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
-
-    <!-- קישורי CSS -->
+    <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
+    <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
+    <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
+    <link href="static/css/chunk-1176cb8e.7dbc7ae3.css" rel="prefetch">
+    <link href="static/css/chunk-12fd5eba.a21c779c.css" rel="prefetch">
+    <link href="static/css/chunk-4aef0516.6477bd25.css" rel="prefetch">
+    <link href="static/css/chunk-5e572502.5e6bdd68.css" rel="prefetch">
+    <link href="static/css/chunk-70060db0.f6631c2e.css" rel="prefetch">
+    <link href="static/css/chunk-70dcc80f.3a6e3fab.css" rel="prefetch">
+    <link href="static/css/chunk-7398b612.c4a0cd01.css" rel="prefetch">
+    <link href="static/css/chunk-7b72ac9b.571863c7.css" rel="prefetch">
+    <link href="static/css/chunk-8b345fa4.5e4e8562.css" rel="prefetch">
+    <link href="static/css/chunk-8f7e9f0a.4125a708.css" rel="prefetch">
+    <link href="static/css/chunk-9eebefec.e4d0a342.css" rel="prefetch">
+    <link href="static/css/chunk-a21946ae.bb600696.css" rel="prefetch">
+    <link href="static/css/chunk-a7c4b1c0.826d02ca.css" rel="prefetch">
+    <link href="static/css/chunk-c008c720.c312a51e.css" rel="prefetch">
+    <link href="static/css/chunk-c61f00f2.51283979.css" rel="prefetch">
+    <link href="static/css/chunk-c7934cbc.3cd793e9.css" rel="prefetch">
+    <link href="static/css/chunk-e11b8b12.c49fe662.css" rel="prefetch">
+    <link href="static/css/chunk-e6f2f230.950fdf7a.css" rel="prefetch">
+    <link href="static/css/chunk-ec85e9da.15134b5c.css" rel="prefetch">
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
-    <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
+    <link href="static/js/app.36323100.js" rel="preload" as="script">
+    <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
+    <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
     <style>
-        /* עיצוב חלונית בחירת השפה */
-        #languageMenu {
+        #languageButtons {
             position: fixed;
             top: 10px;
             right: 10px;
             background: white;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: none;
-            flex-direction: column;
-            gap: 8px;
             padding: 10px;
-            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 9999;
+            display: flex;
+            gap: 8px;
         }
 
-        .langButton {
-            padding: 10px;
+        #languageButtons button {
+            padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -40,30 +60,17 @@
             transition: all 0.3s;
         }
 
-        .langButton:hover {
+        #languageButtons button:hover {
             background: #4caf50;
             color: white;
         }
 
-        .langButton.active {
+        #languageButtons button.active {
             background: #4caf50;
             color: white;
         }
 
-        #toggleMenu {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            cursor: pointer;
-            z-index: 1001;
-        }
-
-        .loading {
+        .loading-indicator {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -73,115 +80,74 @@
             padding: 20px;
             border-radius: 8px;
             display: none;
-            z-index: 1002;
+            z-index: 10000;
         }
     </style>
 </head>
 <body>
-    <!-- כפתור לפתיחת חלונית השפות -->
-    <button id="toggleMenu">בחר שפה</button>
-
-    <!-- חלונית בחירת שפה -->
-    <div id="languageMenu">
-        <button class="langButton" data-lang="en">English</button>
-        <button class="langButton" data-lang="he">עברית</button>
-        <button class="langButton" data-lang="ru">Русский</button>
-        <button class="langButton" data-lang="it">Italiano</button>
-        <button class="langButton" data-lang="es">Español</button>
+    <!-- כפתורי בחירת שפה -->
+    <div id="languageButtons">
+        <button data-lang="en" onclick="changeLanguage('en')" class="active">English</button>
+        <button data-lang="he" onclick="changeLanguage('he')">עברית</button>
+        <button data-lang="ru" onclick="changeLanguage('ru')">Русский</button>
+        <button data-lang="it" onclick="changeLanguage('it')">Italiano</button>
+        <button data-lang="es" onclick="changeLanguage('es')">Español</button>
     </div>
 
     <!-- אינדיקטור טעינה -->
-    <div class="loading" id="loadingIndicator">מתרגם...</div>
+    <div class="loading-indicator" id="loadingIndicator">מתרגם...</div>
 
-    <!-- תוכן -->
+    <!-- האלמנט המרכזי של האפליקציה -->
     <div id="app">
         <h1>Welcome to our website!</h1>
         <p>This is a sample page for demonstrating translation.</p>
     </div>
 
-    <!-- קבצי JavaScript -->
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
     <script>
-        const apiKey = 'YAIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף במפתח API תקין
-        const translationCache = new Map();
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס מפתח API
         let currentLanguage = 'en';
 
-        function detectBrowserLanguage() {
-            return navigator.language || 'en';
-        }
-
-        function toggleLanguageMenu() {
-            const menu = document.getElementById('languageMenu');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-        }
-
         async function translateText(text, targetLang) {
-            if (!text.trim() || translationCache.has(`${text}:${targetLang}`)) {
-                return translationCache.get(`${text}:${targetLang}`) || text;
-            }
+            if (!text.trim()) return text;
 
-            try {
-                const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
-                });
+            const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
+            });
 
-                if (!response.ok) throw new Error('Translation failed');
-                const result = await response.json();
-                const translatedText = result.data.translations[0].translatedText;
-
-                translationCache.set(`${text}:${targetLang}`, translatedText);
-                return translatedText;
-            } catch (error) {
-                console.error('Translation error:', error);
-                return text;
-            }
+            if (!response.ok) throw new Error('Translation failed');
+            const data = await response.json();
+            return data.data.translations[0].translatedText;
         }
 
-        async function translatePage(targetLang) {
+        async function translatePage(lang) {
             const loadingIndicator = document.getElementById('loadingIndicator');
             loadingIndicator.style.display = 'block';
 
             const elements = document.querySelectorAll('#app *');
             for (const element of elements) {
                 if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
-                    element.textContent = await translateText(element.textContent, targetLang);
+                    element.textContent = await translateText(element.textContent, lang);
                 }
             }
 
             loadingIndicator.style.display = 'none';
         }
 
-        async function changeLanguage(lang) {
+        function changeLanguage(lang) {
             if (lang === currentLanguage) return;
-            currentLanguage = lang;
 
-            document.querySelectorAll('.langButton').forEach(button => {
+            document.querySelectorAll('#languageButtons button').forEach(button => {
                 button.classList.toggle('active', button.dataset.lang === lang);
             });
 
-            await translatePage(lang);
+            currentLanguage = lang;
+            translatePage(lang);
         }
-
-        function setupLanguageButtons() {
-            document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
-
-            document.querySelectorAll('.langButton').forEach(button => {
-                button.addEventListener('click', async () => {
-                    toggleLanguageMenu();
-                    await changeLanguage(button.dataset.lang);
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setupLanguageButtons();
-            const browserLang = detectBrowserLanguage().split('-')[0];
-            changeLanguage(browserLang);
-        });
     </script>
 </body>
 </html>
