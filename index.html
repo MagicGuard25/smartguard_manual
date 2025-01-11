@@ -6,65 +6,86 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
-
-    <!-- קבצי סגנון -->
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
-    
-    <!-- כל שאר קבצי ה-CSS וה-JS -->
-    <!-- ... -->
 </head>
 <body>
     <noscript>
         <strong>אנו מצטערים, אך vue3 לא עובד כראוי ללא JavaScript מופעל. אנא הפעל אותו כדי להמשיך.</strong>
     </noscript>
     <div id="app"></div>
-    
-    <!-- קבצי JavaScript -->
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
-    <!-- סקריפט התרגום -->
     <script>
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף עם המפתח שלך
         const translationCache = new Map();
-        
-        // פונקציה לתרגום טקסט
+
+        // פונקציה לזיהוי שפה
+        function detectLanguage(text) {
+            // זיהוי סינית
+            if (/[\u4E00-\u9FFF]/.test(text)) {
+                return 'zh';
+            }
+            // זיהוי אנגלית
+            if (/^[a-zA-Z\s\d.,!?'"()\-:;]+$/.test(text)) {
+                return 'en';
+            }
+            // זיהוי עברית
+            if (/[\u0590-\u05FF]/.test(text)) {
+                return 'he';
+            }
+            return null;
+        }
+
         async function translateText(text) {
-            if (!text || !text.trim() || text.length < 2) return text;
-            
-            // בדיקת מטמון
+            if (!text || !text.trim()) return text;
+
             const cacheKey = text;
             if (translationCache.has(cacheKey)) {
                 return translationCache.get(cacheKey);
             }
 
-            const params = new URLSearchParams({
-                key: apiKey,
-                q: text,
-                target: 'iw', // קוד שפה לעברית
-                source: 'zh' // קוד שפה לסינית
-            });
+            // דלג על טקסט קצר מדי או מספרים
+            if (text.length < 2 || !isNaN(text)) {
+                return text;
+            }
+
+            // זיהוי שפת המקור
+            const sourceLanguage = detectLanguage(text);
+            if (!sourceLanguage || sourceLanguage === 'he') {
+                return text;
+            }
 
             try {
-                const response = await fetch(`https://translation.googleapis.com/language/translate/v2?${params.toString()}`, {
+                const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+                const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        q: text,
+                        source: sourceLanguage,
+                        target: 'he',
+                        format: 'html'
+                    })
                 });
 
                 if (!response.ok) {
-                    console.error('Translation error:', await response.text());
+                    console.error('Translation failed:', await response.text());
                     return text;
                 }
 
                 const data = await response.json();
-                const translatedText = data.data?.translations?.[0]?.translatedText || text;
-                
-                // שמירה במטמון
+                if (!data.data?.translations?.[0]?.translatedText) {
+                    return text;
+                }
+
+                const translatedText = data.data.translations[0].translatedText;
                 translationCache.set(cacheKey, translatedText);
-                
                 return translatedText;
             } catch (error) {
                 console.error('Translation error:', error);
@@ -72,139 +93,124 @@
             }
         }
 
-        // פונקציית עזר לבדיקה אם טקסט מכיל סינית
-        function containsChinese(text) {
-            return /[\u4E00-\u9FFF]/.test(text);
-        }
-
-        // פונקציה לתרגום אלמנט
         async function translateElement(element) {
-            if (!element || element.hasAttribute('translated') || 
-                element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
+            if (!element) return;
+
+            // דלג על אלמנטים מסוימים
+            if (element.tagName === 'SCRIPT' || 
+                element.tagName === 'STYLE' || 
+                element.hasAttribute('no-translate') ||
+                element.classList.contains('no-translate')) {
                 return;
             }
 
-            // תרגום תוכן טקסט
-            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-            const textNodes = [];
+            // תרגום טקסט בתוך האלמנט
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
             let node;
-            
+            const textNodes = [];
             while (node = walker.nextNode()) {
                 const text = node.textContent.trim();
-                if (text && containsChinese(text)) {
+                if (text) {
                     textNodes.push(node);
                 }
             }
 
-            // תרגום כל הטקסטים במקביל
-            const translations = await Promise.all(
-                textNodes.map(async node => {
-                    const text = node.textContent.trim();
-                    return translateText(text);
-                })
-            );
-
-            textNodes.forEach((node, index) => {
-                node.textContent = translations[index];
-            });
-
-            // תרגום תכונות
-            const attrs = ['placeholder', 'title', 'alt', 'aria-label'];
-            for (const attr of attrs) {
-                if (element.hasAttribute(attr)) {
-                    const text = element.getAttribute(attr);
-                    if (text && containsChinese(text)) {
-                        const translated = await translateText(text);
-                        element.setAttribute(attr, translated);
+            for (const node of textNodes) {
+                const text = node.textContent.trim();
+                if (text) {
+                    const translatedText = await translateText(text);
+                    if (translatedText !== text) {
+                        node.textContent = node.textContent.replace(text, translatedText);
                     }
                 }
             }
 
-            // סימון שהאלמנט תורגם
-            element.setAttribute('translated', 'true');
+            // תרגום תכונות
+            const attributesToTranslate = ['placeholder', 'title', 'alt', 'aria-label'];
+            for (const attr of attributesToTranslate) {
+                if (element.hasAttribute(attr)) {
+                    const text = element.getAttribute(attr);
+                    if (text) {
+                        const translatedText = await translateText(text);
+                        if (translatedText !== text) {
+                            element.setAttribute(attr, translatedText);
+                        }
+                    }
+                }
+            }
         }
 
-        // פונקציה למעקב אחר שינויים
+        async function translatePage() {
+            const app = document.getElementById('app');
+            if (app) {
+                console.log('Starting translation...');
+                await translateElement(app);
+                console.log('Translation completed');
+            }
+        }
+
         function observeChanges() {
             const observer = new MutationObserver((mutations) => {
-                const changedElements = new Set();
-                
-                mutations.forEach(mutation => {
+                for (const mutation of mutations) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeType === Node.ELEMENT_NODE) {
-                                changedElements.add(node);
+                                translateElement(node);
                             }
                         });
+                    } else if (mutation.type === 'characterData') {
+                        const node = mutation.target;
+                        if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
+                            translateElement(node.parentElement);
+                        }
                     }
-                });
-
-                if (changedElements.size > 0) {
-                    changedElements.forEach(element => {
-                        translateElement(element);
-                    });
                 }
             });
 
             observer.observe(document.body, {
                 childList: true,
                 subtree: true,
-                attributes: false,
-                characterData: false
+                characterData: true
             });
         }
 
-        // פונקציה לתרגום כל הדף
-        async function translatePage() {
-            const elements = document.querySelectorAll('*:not([translated])');
-            const chunks = [];
-            const chunkSize = 10;
-            
-            for (let i = 0; i < elements.length; i += chunkSize) {
-                chunks.push(Array.from(elements).slice(i, i + chunkSize));
-            }
-
-            for (const chunk of chunks) {
-                await Promise.all(chunk.map(element => translateElement(element)));
-                // המתנה קצרה בין צ'אנקים כדי לא להעמיס על ה-API
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+        // בדיקת תוכן חדש
+        function startPeriodicCheck() {
+            setInterval(() => {
+                const app = document.getElementById('app');
+                if (app) {
+                    translateElement(app);
+                }
+            }, 2000);
         }
 
-        // אתחול התרגום
-        let translationInterval;
-        
-        async function initTranslation() {
-            // המתנה לטעינת האפליקציה
-            translationInterval = setInterval(async () => {
+        // אתחול
+        function initialize() {
+            const checkForApp = setInterval(() => {
                 const app = document.getElementById('app');
                 if (app && app.children.length > 0) {
-                    clearInterval(translationInterval);
-                    
-                    // תרגום ראשוני
-                    await translatePage();
-                    
-                    // הגדרת מעקב אחר שינויים
+                    clearInterval(checkForApp);
+                    console.log('App found, starting translation...');
+                    translatePage();
                     observeChanges();
-                    
-                    // תרגום תקופתי לתפיסת תוכן שהוחמץ
-                    setInterval(translatePage, 5000);
+                    startPeriodicCheck();
                 }
             }, 500);
 
-            // הפסקת הבדיקה אחרי דקה
-            setTimeout(() => {
-                if (translationInterval) {
-                    clearInterval(translationInterval);
-                }
-            }, 60000);
+            setTimeout(() => clearInterval(checkForApp), 30000);
         }
 
-        // הפעלה כשהדף נטען
+        // הפעלה
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initTranslation);
+            document.addEventListener('DOMContentLoaded', initialize);
         } else {
-            initTranslation();
+            initialize();
         }
     </script>
 </body>
