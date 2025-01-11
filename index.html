@@ -15,7 +15,6 @@
     
     <!-- קבצי CSS נוספים (Prefetch) -->
     <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
-    <!-- ... (שאר קבצי ה-CSS נשארים אותו דבר) ... -->
 </head>
 <body>
     <noscript>
@@ -41,7 +40,7 @@
     <!-- סקריפט התרגום -->
     <script>
         // Google Translate API Key
-        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף את YOUR_API_KEY במפתח ה-API שלך
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף את זה עם המפתח שלך
 
         // רשימת תגיות HTML שצריך לתרגם
         const TRANSLATABLE_ELEMENTS = [
@@ -53,8 +52,13 @@
         // מטמון תרגומים
         const translationCache = new Map();
 
-        // פונקציה לתרגום טקסט
+        // פונקציה לתרגום טקסט בודד
         async function translateText(text, targetLanguage) {
+            if (!targetLanguage) {
+                console.error('Target language is missing!');
+                return text;
+            }
+
             if (!text || !text.trim() || !isNaN(text)) {
                 return text;
             }
@@ -64,130 +68,63 @@
                 return translationCache.get(cacheKey);
             }
 
-            const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+            const url = 'https://translation.googleapis.com/language/translate/v2';
+            const params = new URLSearchParams({
+                key: apiKey,
+                q: text,
+                target: targetLanguage.toLowerCase(),
+                format: 'html'
+            });
+
             try {
-                const response = await fetch(url, {
+                console.log(`Translating to ${targetLanguage}:`, text);
+                
+                const response = await fetch(`${url}?${params.toString()}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        q: text,
-                        target: targetLanguage,
-                        source: 'auto'
-                    })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
                 });
 
                 if (!response.ok) {
-                    console.error('Translation error:', await response.text());
+                    const errorData = await response.json();
+                    console.error('Translation API Error:', errorData);
                     return text;
                 }
 
                 const data = await response.json();
-                const translatedText = data.data.translations[0].translatedText;
-                translationCache.set(cacheKey, translatedText);
-                return translatedText;
+                console.log('Translation response:', data);
+
+                if (data.data?.translations?.[0]) {
+                    const translatedText = data.data.translations[0].translatedText;
+                    translationCache.set(cacheKey, translatedText);
+                    return translatedText;
+                }
+
+                console.error('Unexpected API response structure:', data);
+                return text;
             } catch (error) {
-                console.error('Translation API error:', error);
+                console.error('Translation failed:', error);
                 return text;
             }
         }
 
-        // פונקציה לתרגום טקסט בודד
-async function translateText(text, targetLanguage) {
-    if (!text || !text.trim() || !isNaN(text)) {
-        return text;
-    }
-
-    const cacheKey = `${text}:${targetLanguage}`;
-    if (translationCache.has(cacheKey)) {
-        return translationCache.get(cacheKey);
-    }
-
-    console.log(`Translating to ${targetLanguage}:`, text); // לוג לדיבוג
-
-    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
-    try {
-        const requestBody = {
-            q: text,
-            target: targetLanguage,
-            format: 'html'
-        };
-
-        console.log('Request body:', requestBody); // לוג לדיבוג
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Translation API Error:', errorData);
-            return text;
-        }
-
-        const data = await response.json();
-        console.log('Translation response:', data); // לוג לדיבוג
-
-        if (data.data && data.data.translations && data.data.translations[0]) {
-            const translatedText = data.data.translations[0].translatedText;
-            translationCache.set(cacheKey, translatedText);
-            return translatedText;
-        } else {
-            console.error('Unexpected API response structure:', data);
-            return text;
-        }
-    } catch (error) {
-        console.error('Translation failed:', error);
-        return text;
-    }
-}
-
-// פונקציה לתרגום אלמנט בודד
-async function translateElement(element, targetLanguage) {
-    if (!targetLanguage) {
-        console.error('Target language is missing');
-        return;
-    }
-
-    // דלג על אלמנטים שלא צריך לתרגם
-    if (element.hasAttribute('no-translate') || 
-        element.tagName === 'SCRIPT' || 
-        element.tagName === 'STYLE') {
-        return;
-    }
-
-    // תרגום טקסט
-    for (const node of element.childNodes) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent.trim();
-            if (text) {
-                const translated = await translateText(text, targetLanguage);
-                if (translated !== text) {
-                    node.textContent = node.textContent.replace(text, translated);
-                }
+        // פונקציה לתרגום אלמנט בודד
+        async function translateElement(element, targetLanguage) {
+            if (!targetLanguage) {
+                console.error('Target language is missing');
+                return;
             }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            await translateElement(node, targetLanguage);
-        }
-    }
 
-    // תרגום תכונות
-    const attributes = ['placeholder', 'title', 'alt', 'aria-label'];
-    for (const attr of attributes) {
-        if (element.hasAttribute(attr)) {
-            const text = element.getAttribute(attr);
-            if (text) {
-                const translated = await translateText(text, targetLanguage);
-                element.setAttribute(attr, translated);
+            // דלג על אלמנטים שלא צריך לתרגם
+            if (element.hasAttribute('no-translate') || 
+                element.tagName === 'SCRIPT' || 
+                element.tagName === 'STYLE') {
+                return;
             }
-        }
-    }
-}
- // תרגום טקסט
+
+            // תרגום טקסט
             for (const node of element.childNodes) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent.trim();
@@ -201,6 +138,18 @@ async function translateElement(element, targetLanguage) {
                     await translateElement(node, targetLanguage);
                 }
             }
+
+            // תרגום תכונות
+            const attributes = ['placeholder', 'title', 'alt', 'aria-label'];
+            for (const attr of attributes) {
+                if (element.hasAttribute(attr)) {
+                    const text = element.getAttribute(attr);
+                    if (text) {
+                        const translated = await translateText(text, targetLanguage);
+                        element.setAttribute(attr, translated);
+                    }
+                }
+            }
         }
 
         // פונקציה לתרגום כל הדף
@@ -208,16 +157,15 @@ async function translateElement(element, targetLanguage) {
             console.log(`Starting translation to ${targetLanguage}...`);
             
             try {
-                // תרגום אלמנטים נבחרים
+                const app = document.getElementById('app');
+                if (app) {
+                    console.log('Found Vue app, translating...');
+                    await translateElement(app, targetLanguage);
+                }
+                
                 const elements = document.querySelectorAll(TRANSLATABLE_ELEMENTS.join(', '));
                 for (const element of elements) {
                     await translateElement(element, targetLanguage);
-                }
-
-                // תרגום האפליקציה של Vue אם קיימת
-                const app = document.getElementById('app');
-                if (app) {
-                    await translateElement(app, targetLanguage);
                 }
                 
                 localStorage.setItem('selectedLanguage', targetLanguage);
@@ -227,7 +175,7 @@ async function translateElement(element, targetLanguage) {
             }
         }
 
-        // הוספת אירועי לחיצה לכפתורים
+        // פונקציה להגדרת כפתורי השפה
         function setupLanguageButtons() {
             const buttons = document.querySelectorAll('#language-buttons button');
             buttons.forEach(button => {
@@ -276,6 +224,5 @@ async function translateElement(element, targetLanguage) {
 
     <!-- Prefetch קבצי JavaScript נוספים -->
     <link href="static/js/chunk-039261d5.2abaea03.js" rel="prefetch">
-    <!-- ... (שאר קבצי ה-JavaScript נשארים אותו דבר) ... -->
 </body>
 </html>
