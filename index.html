@@ -178,8 +178,20 @@
             });
         }
 
+        function observePageChanges() {
+            const observer = new MutationObserver(() => {
+                translatePage(currentLanguage);
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
+            observePageChanges();
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
             translatePage(currentLanguage); // תרגום ראשוני
         });
