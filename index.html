@@ -209,7 +209,7 @@
 
                 offsetX = touch.clientX - button.getBoundingClientRect().left;
                 offsetY = touch.clientY - button.getBoundingClientRect().top;
-                document.body.style.touchAction = 'none';
+                document.body.style.overflow = 'hidden';
 
                 button.addEventListener('mousemove', drag);
                 button.addEventListener('mouseup', endDrag);
@@ -231,7 +231,7 @@
             };
 
             const endDrag = () => {
-                document.body.style.touchAction = '';
+                document.body.style.overflow = '';
                 button.removeEventListener('mousemove', drag);
                 button.removeEventListener('mouseup', endDrag);
                 button.removeEventListener('touchmove', drag);
