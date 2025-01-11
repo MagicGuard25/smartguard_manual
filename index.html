@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,15 +8,16 @@
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
 
-    <!-- CSS Prefetch -->
+    <!-- קבצי CSS -->
     <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
     <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
-    <link href="static/css/chunk-06c6c55e.6477bd25.css" rel="prefetch">
     <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
     <link href="static/css/chunk-1176cb8e.7dbc7ae3.css" rel="prefetch">
     <link href="static/css/chunk-12fd5eba.a21c779c.css" rel="prefetch">
+    <link href="static/css/chunk-4aef0516.6477bd25.css" rel="prefetch">
     <link href="static/css/chunk-5e572502.5e6bdd68.css" rel="prefetch">
     <link href="static/css/chunk-70060db0.f6631c2e.css" rel="prefetch">
+    <link href="static/css/chunk-70dcc80f.3a6e3fab.css" rel="prefetch">
     <link href="static/css/chunk-7398b612.c4a0cd01.css" rel="prefetch">
     <link href="static/css/chunk-7b72ac9b.571863c7.css" rel="prefetch">
     <link href="static/css/chunk-8b345fa4.5e4e8562.css" rel="prefetch">
@@ -25,53 +27,39 @@
     <link href="static/css/chunk-a7c4b1c0.826d02ca.css" rel="prefetch">
     <link href="static/css/chunk-c008c720.c312a51e.css" rel="prefetch">
     <link href="static/css/chunk-c61f00f2.51283979.css" rel="prefetch">
-    <link href="static/css/chunk-c6baff6a.b0b4aff2.css" rel="prefetch">
     <link href="static/css/chunk-c7934cbc.3cd793e9.css" rel="prefetch">
     <link href="static/css/chunk-e11b8b12.c49fe662.css" rel="prefetch">
     <link href="static/css/chunk-e6f2f230.950fdf7a.css" rel="prefetch">
     <link href="static/css/chunk-ec85e9da.15134b5c.css" rel="prefetch">
-
-    <!-- JS Prefetch -->
-    <link href="static/js/chunk-039261d5.2abaea03.js" rel="prefetch">
-    <link href="static/js/chunk-05ced2b6.9bc49b43.js" rel="prefetch">
-    <link href="static/js/chunk-06c6c55e.2b02e844.js" rel="prefetch">
-    <link href="static/js/chunk-0ad1966f.9998cfcd.js" rel="prefetch">
-    <link href="static/js/chunk-1176cb8e.5fc10bc7.js" rel="prefetch">
-    <link href="static/js/chunk-12fd5eba.2ca53e03.js" rel="prefetch">
-    <link href="static/js/chunk-5e572502.66a680b0.js" rel="prefetch">
-    <link href="static/js/chunk-70060db0.be555394.js" rel="prefetch">
-    <link href="static/js/chunk-7398b612.0596c46d.js" rel="prefetch">
-    <link href="static/js/chunk-77805aae.d60c1a6d.js" rel="prefetch">
-    <link href="static/js/chunk-7b72ac9b.5670bee2.js" rel="prefetch">
-    <link href="static/js/chunk-8b345fa4.a5875d6c.js" rel="prefetch">
-    <link href="static/js/chunk-8f7e9f0a.7f5a1345.js" rel="prefetch">
-    <link href="static/js/chunk-9eebefec.c867411c.js" rel="prefetch">
-    <link href="static/js/chunk-a21946ae.a952bc6b.js" rel="prefetch">
-    <link href="static/js/chunk-a7c4b1c0.f3571411.js" rel="prefetch">
-    <link href="static/js/chunk-c008c720.62018fbe.js" rel="prefetch">
-    <link href="static/js/chunk-c61f00f2.23796429.js" rel="prefetch">
-    <link href="static/js/chunk-c6baff6a.020c4073.js" rel="prefetch">
-    <link href="static/js/chunk-c7934cbc.96ef7314.js" rel="prefetch">
-    <link href="static/js/chunk-e11b8b12.b18dc983.js" rel="prefetch">
-    <link href="static/js/chunk-e6f2f230.8084a38d.js" rel="prefetch">
-    <link href="static/js/chunk-ec85e9da.2b79db67.js" rel="prefetch">
-
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
-    <link href="static/js/app.36323100.js" rel="preload" as="script">
-    <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
-
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
     <style>
+        /* עיצוב הכפתור להצגת תפריט השפות */
+        #toggleMenu {
+            position: fixed;
+            top: 10px; /* שינוי: הועלה למעלה */
+            right: 55px; /* שינוי: הוזז שמאלה */
+            background: #333; /* צבע שחור-אפור */
+            color: white; /* צבע הטקסט נשאר לבן */
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 14px; /* לשיפור נראות */
+        }
+
+        /* עיצוב התפריט */
         #languageMenu {
             position: fixed;
-            top: 45px;
-            right: 55px;
+            top: 50px;
+            right: 20px; /* שינוי: התאם לכפתור */
             background: white;
-            border: 2px solid #ccc;
-            border-radius: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             padding: 10px;
             display: none;
@@ -90,7 +78,6 @@
                 opacity: 0;
                 transform: translateY(-5px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -103,25 +90,13 @@
             border-radius: 20px;
             cursor: pointer;
             background: #f0f0f0;
-            color: black;
+            color: #000; /* צבע טקסט שחור */
             transition: all 0.3s;
         }
 
         .langButton:hover {
-            background: #d3d3d3;
-        }
-
-        #toggleMenu {
-            position: fixed;
-            top: 5px;
-            right: 60px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 20px;
-            cursor: pointer;
-            z-index: 1001;
+            background: #d3d3d3; /* צבע רקע אפור בריחוף */
+            color: black; /* שמירת צבע טקסט שחור */
         }
 
         .loading {
@@ -137,6 +112,7 @@
             z-index: 1002;
         }
     </style>
+
 </head>
 
 <body>
@@ -167,6 +143,8 @@
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
+            const cleanText = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&'); // החלפת מרכאות ותווים מיוחדים
+
             try {
                 const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
                     method: 'POST',
@@ -174,7 +152,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        q: text,
+                        q: cleanText,
                         target: targetLang,
                         format: 'html'
                     })
@@ -201,12 +179,14 @@
             }
 
             const attributesToTranslate = ['title', 'placeholder', 'alt'];
-            for (const attr of attributesToTranslate) {
+            attributesToTranslate.forEach(attr => {
                 if (element.hasAttribute(attr)) {
                     const attrText = element.getAttribute(attr);
-                    element.setAttribute(attr, await translateText(attrText, targetLang));
+                    if (attrText) {
+                        element.setAttribute(attr, translateText(attrText, targetLang));
+                    }
                 }
-            }
+            });
         }
 
         async function translatePage(lang) {
@@ -231,11 +211,11 @@
         function observeDomChanges() {
             const observer = new MutationObserver(mutations => {
                 mutations.forEach(async mutation => {
-                    for (const node of mutation.addedNodes) {
+                    mutation.addedNodes.forEach(async node => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             await translateElement(node, currentLanguage);
                         }
-                    }
+                    });
                 });
             });
 
@@ -252,10 +232,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
-            observeDomChanges();
+            observeDomChanges(); // מעקב אחרי שינויים ב-DOM
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
-            translatePage(currentLanguage);
+            translatePage(currentLanguage); // תרגום ראשוני
         });
     </script>
 </body>
+
 </html>
