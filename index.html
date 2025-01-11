@@ -1,16 +1,7 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
-    <link rel="icon" href="favicon.ico">
-    <title>vue3</title>
-    <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
-    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
-    <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
-    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
-
+    <!-- שאר ה-head נשאר זהה -->
     <style>
         #languageButtons {
             position: fixed;
@@ -27,7 +18,7 @@
             max-width: 300px;
         }
 
-        #languageButtons button {
+        .langBtn {
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
@@ -35,30 +26,21 @@
             font-weight: bold;
             transition: all 0.3s;
             min-width: 80px;
-        }
-
-        #languageButtons button:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-
-        #languageButtons button[data-active="true"] {
-            background: #4CAF50;
-            color: white;
-        }
-
-        #languageButtons button[data-active="false"] {
             background: #f0f0f0;
             color: #333;
         }
 
-        #languageButtons button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .langBtn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
         }
 
-        /* סגנון לאינדיקטור טעינה */
-        .loading-indicator {
+        .langBtn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .loading {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -68,66 +50,78 @@
             padding: 20px;
             border-radius: 8px;
             display: none;
+            z-index: 10000;
         }
     </style>
 </head>
 <body>
     <div id="languageButtons">
-        <button data-lang="he" data-active="true" onclick="changeLanguage('he')">עברית</button>
-        <button data-lang="en" data-active="false" onclick="changeLanguage('en')">English</button>
-        <button data-lang="ru" data-active="false" onclick="changeLanguage('ru')">Русский</button>
-        <button data-lang="it" data-active="false" onclick="changeLanguage('it')">Italiano</button>
-        <button data-lang="es" data-active="false" onclick="changeLanguage('es')">Español</button>
+        <button class="langBtn" onclick="translate('he')">עברית</button>
+        <button class="langBtn" onclick="translate('en')">English</button>
+        <button class="langBtn" onclick="translate('ru')">Русский</button>
+        <button class="langBtn" onclick="translate('it')">Italiano</button>
+        <button class="langBtn" onclick="translate('es')">Español</button>
     </div>
 
-    <div class="loading-indicator" id="loadingIndicator">מתרגם...</div>
-
+    <div class="loading" id="loadingIndicator">מתרגם...</div>
+    
     <div id="app"></div>
-
-    <script src="static/js/chunk-vendors.111f4aba.js"></script>
-    <script src="static/js/app.36323100.js"></script>
 
     <script>
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
-        let currentLanguage = 'he';
         const translationCache = new Map();
         let isTranslating = false;
 
-        function detectLanguage(text) {
-            if (/[\u4E00-\u9FFF]/.test(text)) return 'zh';
-            if (/[a-zA-Z]/.test(text)) return 'en';
-            if (/[\u0590-\u05FF]/.test(text)) return 'he';
-            return null;
+        async function detectLanguage(text) {
+            try {
+                const url = `https://translation.googleapis.com/language/detect/v2?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ q: text })
+                });
+
+                if (!response.ok) return null;
+
+                const data = await response.json();
+                return data?.data?.detections?.[0]?.[0]?.language;
+            } catch (error) {
+                console.error('Language detection error:', error);
+                return null;
+            }
         }
 
         async function translateText(text, targetLang) {
             if (!text || !text.trim() || text.length < 2) return text;
-            
+
             const cacheKey = `${text}:${targetLang}`;
             if (translationCache.has(cacheKey)) {
                 return translationCache.get(cacheKey);
             }
 
-            const sourceLang = detectLanguage(text);
-            if (sourceLang === targetLang) return text;
-
             try {
-                const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
+                // זיהוי שפת המקור
+                const sourceLang = await detectLanguage(text);
+                if (sourceLang === targetLang) return text;
+
+                const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         q: text,
                         target: targetLang,
-                        source: sourceLang || 'auto',
                         format: 'html'
                     })
                 });
 
-                if (!response.ok) throw new Error('Translation failed');
+                if (!response.ok) {
+                    throw new Error('Translation failed');
+                }
 
                 const data = await response.json();
                 const translatedText = data.data?.translations?.[0]?.translatedText;
-                
+
                 if (translatedText) {
                     translationCache.set(cacheKey, translatedText);
                     return translatedText;
@@ -149,25 +143,29 @@
                 return;
             }
 
+            // תרגום טקסט רגיל
             const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-            let node;
             const textNodes = [];
+            let node;
             
             while (node = walker.nextNode()) {
                 const text = node.textContent.trim();
-                if (text && (detectLanguage(text) === 'zh' || detectLanguage(text) === 'en')) {
+                if (text) {
                     textNodes.push(node);
                 }
             }
 
             for (const node of textNodes) {
                 const text = node.textContent.trim();
-                const translated = await translateText(text, targetLang);
-                if (translated !== text) {
-                    node.textContent = node.textContent.replace(text, translated);
+                if (text) {
+                    const translated = await translateText(text, targetLang);
+                    if (translated !== text) {
+                        node.textContent = node.textContent.replace(text, translated);
+                    }
                 }
             }
 
+            // תרגום תכונות
             const attrs = ['placeholder', 'title', 'alt', 'aria-label'];
             for (const attr of attrs) {
                 if (element.hasAttribute(attr)) {
@@ -180,42 +178,49 @@
             }
         }
 
-        async function changeLanguage(lang) {
-            if (isTranslating || lang === currentLanguage) return;
+        async function translate(targetLang) {
+            if (isTranslating) return;
             
             isTranslating = true;
-            currentLanguage = lang;
-
-            document.querySelectorAll('#languageButtons button').forEach(btn => {
-                btn.dataset.active = btn.dataset.lang === lang;
-                btn.disabled = true;
-            });
-
-            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-            document.getElementById('loadingIndicator').style.display = 'block';
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const buttons = document.querySelectorAll('.langBtn');
 
             try {
+                // עדכון UI
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('active');
+                    if (btn.textContent.includes(targetLang)) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                loadingIndicator.style.display = 'block';
+                document.documentElement.dir = targetLang === 'he' ? 'rtl' : 'ltr';
+
+                // תרגום
                 const app = document.getElementById('app');
                 if (app) {
-                    await translateElement(app, lang);
+                    await translateElement(app, targetLang);
                 }
             } finally {
-                document.querySelectorAll('#languageButtons button').forEach(btn => {
-                    btn.disabled = false;
-                });
-                document.getElementById('loadingIndicator').style.display = 'none';
+                // החזרת UI למצב רגיל
+                buttons.forEach(btn => btn.disabled = false);
+                loadingIndicator.style.display = 'none';
                 isTranslating = false;
             }
         }
 
+        // מעקב אחר שינויים
         const observer = new MutationObserver((mutations) => {
             if (isTranslating) return;
 
+            const targetLang = document.documentElement.dir === 'rtl' ? 'he' : 'en';
             mutations.forEach(mutation => {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            translateElement(node, currentLanguage);
+                            translateElement(node, targetLang);
                         }
                     });
                 }
@@ -227,12 +232,13 @@
             subtree: true
         });
 
+        // אתחול
         document.addEventListener('DOMContentLoaded', () => {
             const checkApp = setInterval(() => {
                 const app = document.getElementById('app');
                 if (app && app.children.length > 0) {
                     clearInterval(checkApp);
-                    changeLanguage('he');
+                    translate('he'); // תרגום ראשוני לעברית
                 }
             }, 500);
 
