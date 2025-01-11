@@ -1,5 +1,5 @@
 // Google Translate API Key
-const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף את זה במפתח ה-API שלך
+const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס כאן את מפתח ה-API שלך
 
 // פונקציה לתרגום טקסט בודד
 async function translateText(text, targetLanguage) {
@@ -11,7 +11,7 @@ async function translateText(text, targetLanguage) {
             body: JSON.stringify({
                 q: text,
                 target: targetLanguage,
-                source: 'en' // שפת המקור
+                source: 'en' // שפת המקור (אנגלית)
             })
         });
 
@@ -50,6 +50,7 @@ function setupLanguageButtons() {
 }
 
 // הפעלת הפונקציות בזמן טעינת הדף
-window.onload = () => {
+window.onload = async () => {
     setupLanguageButtons();
+    await translatePage('en'); // תרגום ברירת מחדל לאנגלית
 };
