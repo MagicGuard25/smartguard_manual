@@ -36,30 +36,15 @@
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
-    <style>
-        /* עיצוב הכפתור להצגת תפריט השפות */
-        #toggleMenu {
-            position: fixed;
-            top: 45px; /* שינוי: הועלה למעלה */
-            right: 60px; /* שינוי: הוזז שמאלה */
-            background: #333; /* צבע שחור-אפור */
-            color: white; /* צבע הטקסט נשאר לבן */
-            border: none;
-            border-radius: 20px;
-            padding: 8px 20px;
-            cursor: pointer;
-            z-index: 1001;
-            font-size: 14px; /* לשיפור נראות */
-        }
-
+     <style>
         /* עיצוב התפריט */
         #languageMenu {
             position: fixed;
-            top: 50px;
-            right: 20px; /* שינוי: התאם לכפתור */
+            top: 45px;
+            right: 55px;
             background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             padding: 10px;
             display: none;
@@ -78,6 +63,7 @@
                 opacity: 0;
                 transform: translateY(-5px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -97,6 +83,19 @@
         .langButton:hover {
             background: #d3d3d3; /* צבע רקע אפור בריחוף */
             color: black; /* שמירת צבע טקסט שחור */
+        }
+
+        #toggleMenu {
+            position: fixed;
+            top: 5px; /* העלאת הכפתור למעלה */
+            right: 60px; /* הזזת הכפתור שמאלה */
+            background: #333; /* צבע שחור-אפור */
+            color: white; /* צבע הטקסט נשאר לבן */
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            z-index: 1001;
         }
 
         .loading {
