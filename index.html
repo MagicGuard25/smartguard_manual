@@ -91,25 +91,103 @@
             }
         }
 
-        // פונקציה לתרגום אלמנט בודד
-        async function translateElement(element, targetLanguage) {
-            // דלג על אלמנטים שלא צריך לתרגם
-            if (element.hasAttribute('no-translate') || 
-                element.tagName === 'SCRIPT' || 
-                element.tagName === 'STYLE') {
-                return;
-            }
+        // פונקציה לתרגום טקסט בודד
+async function translateText(text, targetLanguage) {
+    if (!text || !text.trim() || !isNaN(text)) {
+        return text;
+    }
 
-            // תרגום תכונות
-            const attributes = ['placeholder', 'title', 'alt', 'aria-label'];
-            for (const attr of attributes) {
-                if (element.hasAttribute(attr)) {
-                    const translated = await translateText(element.getAttribute(attr), targetLanguage);
-                    element.setAttribute(attr, translated);
+    const cacheKey = `${text}:${targetLanguage}`;
+    if (translationCache.has(cacheKey)) {
+        return translationCache.get(cacheKey);
+    }
+
+    console.log(`Translating to ${targetLanguage}:`, text); // לוג לדיבוג
+
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    try {
+        const requestBody = {
+            q: text,
+            target: targetLanguage,
+            format: 'html'
+        };
+
+        console.log('Request body:', requestBody); // לוג לדיבוג
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Translation API Error:', errorData);
+            return text;
+        }
+
+        const data = await response.json();
+        console.log('Translation response:', data); // לוג לדיבוג
+
+        if (data.data && data.data.translations && data.data.translations[0]) {
+            const translatedText = data.data.translations[0].translatedText;
+            translationCache.set(cacheKey, translatedText);
+            return translatedText;
+        } else {
+            console.error('Unexpected API response structure:', data);
+            return text;
+        }
+    } catch (error) {
+        console.error('Translation failed:', error);
+        return text;
+    }
+}
+
+// פונקציה לתרגום אלמנט בודד
+async function translateElement(element, targetLanguage) {
+    if (!targetLanguage) {
+        console.error('Target language is missing');
+        return;
+    }
+
+    // דלג על אלמנטים שלא צריך לתרגם
+    if (element.hasAttribute('no-translate') || 
+        element.tagName === 'SCRIPT' || 
+        element.tagName === 'STYLE') {
+        return;
+    }
+
+    // תרגום טקסט
+    for (const node of element.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) {
+                const translated = await translateText(text, targetLanguage);
+                if (translated !== text) {
+                    node.textContent = node.textContent.replace(text, translated);
                 }
             }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            await translateElement(node, targetLanguage);
+        }
+    }
 
-            // תרגום טקסט
+    // תרגום תכונות
+    const attributes = ['placeholder', 'title', 'alt', 'aria-label'];
+    for (const attr of attributes) {
+        if (element.hasAttribute(attr)) {
+            const text = element.getAttribute(attr);
+            if (text) {
+                const translated = await translateText(text, targetLanguage);
+                element.setAttribute(attr, translated);
+            }
+        }
+    }
+}
+ // תרגום טקסט
             for (const node of element.childNodes) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent.trim();
