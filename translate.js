@@ -16,25 +16,26 @@ async function translateText(text, targetLanguage) {
         });
 
         if (!response.ok) {
-            console.error('Error translating text:', response.statusText);
+            const errorResponse = await response.json();
+            console.error('Error translating text:', errorResponse.error.message);
             return text; // מחזיר את הטקסט המקורי במקרה של שגיאה
         }
 
         const data = await response.json();
         return data.data.translations[0].translatedText;
     } catch (error) {
-        console.error('Error with translation API:', error);
+        console.error('Error with translation API:', error.message);
         return text; // מחזיר את הטקסט המקורי במקרה של שגיאה
     }
 }
 
 // פונקציה לתרגום כל הטקסטים בדף
 async function translatePage(targetLanguage) {
-    const elements = document.querySelectorAll('[data-translate]'); // בוחרים את כל האלמנטים עם data-translate
+    const elements = document.querySelectorAll('[data-translate]');
     for (const element of elements) {
-        const originalText = element.getAttribute('data-translate'); // מזהה הטקסט
+        const originalText = element.getAttribute('data-translate');
         const translatedText = await translateText(originalText, targetLanguage);
-        element.textContent = translatedText; // מעדכנים את הטקסט המתורגם
+        element.textContent = translatedText;
     }
 }
 
@@ -43,14 +44,14 @@ function setupLanguageButtons() {
     const buttons = document.querySelectorAll('#language-buttons button');
     buttons.forEach(button => {
         button.addEventListener('click', async () => {
-            const language = button.getAttribute('data-lang'); // שפת היעד
-            await translatePage(language); // קריאה לפונקציית התרגום
+            const language = button.getAttribute('data-lang');
+            await translatePage(language);
         });
     });
 }
 
 // תרגום ברירת מחדל לאנגלית בזמן טעינת הדף
 window.onload = async () => {
-    setupLanguageButtons(); // מחבר את הכפתורים
-    await translatePage('en'); // תרגום ברירת מחדל לאנגלית
+    setupLanguageButtons();
+    await translatePage('en');
 };
