@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-    <!-- שאר ה-head נשאר זהה -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
+    <link rel="icon" href="favicon.ico">
+    <title>Dynamic Translation</title>
     <style>
-        #languageButtons {
+        /* סגנון לחלונית הכפתורים */
+        #languageMenu {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -12,10 +17,9 @@
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
+            display: none;
+            flex-direction: column;
             gap: 8px;
-            flex-wrap: wrap;
-            max-width: 300px;
         }
 
         .langBtn {
@@ -31,13 +35,21 @@
         }
 
         .langBtn:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-
-        .langBtn.active {
             background: #4CAF50;
             color: white;
+        }
+
+        .toggleMenu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10000;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
         }
 
         .loading {
@@ -55,7 +67,11 @@
     </style>
 </head>
 <body>
-    <div id="languageButtons">
+    <!-- כפתור לפתיחת התפריט -->
+    <div class="toggleMenu" onclick="toggleLanguageMenu()">בחר שפה</div>
+
+    <!-- חלונית כפתורי השפה -->
+    <div id="languageMenu">
         <button class="langBtn" onclick="translate('he')">עברית</button>
         <button class="langBtn" onclick="translate('en')">English</button>
         <button class="langBtn" onclick="translate('ru')">Русский</button>
@@ -64,46 +80,35 @@
     </div>
 
     <div class="loading" id="loadingIndicator">מתרגם...</div>
-    
-    <div id="app"></div>
+
+    <div id="app">
+        <h1>ברוכים הבאים</h1>
+        <p>זהו דף לדוגמה.</p>
+    </div>
 
     <script>
-        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGegY';
         const translationCache = new Map();
         let isTranslating = false;
 
-        async function detectLanguage(text) {
-            try {
-                const url = `https://translation.googleapis.com/language/detect/v2?key=${apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ q: text })
-                });
-
-                if (!response.ok) return null;
-
-                const data = await response.json();
-                return data?.data?.detections?.[0]?.[0]?.language;
-            } catch (error) {
-                console.error('Language detection error:', error);
-                return null;
-            }
+        // פונקציה לפתיחת/סגירת תפריט השפה
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        async function translateText(text, targetLang) {
-            if (!text || !text.trim() || text.length < 2) return text;
+        // פונקציה לאיתור שפת הדפדפן
+        function detectBrowserLanguage() {
+            return navigator.language || navigator.userLanguage || 'en';
+        }
 
+        // פונקציה לתרגום טקסט
+        async function translateText(text, targetLang) {
+            if (!text.trim()) return text;
             const cacheKey = `${text}:${targetLang}`;
-            if (translationCache.has(cacheKey)) {
-                return translationCache.get(cacheKey);
-            }
+            if (translationCache.has(cacheKey)) return translationCache.get(cacheKey);
 
             try {
-                // זיהוי שפת המקור
-                const sourceLang = await detectLanguage(text);
-                if (sourceLang === targetLang) return text;
-
                 const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
                 const response = await fetch(url, {
                     method: 'POST',
@@ -115,134 +120,46 @@
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error('Translation failed');
-                }
+                if (!response.ok) throw new Error('Translation failed');
 
                 const data = await response.json();
-                const translatedText = data.data?.translations?.[0]?.translatedText;
-
-                if (translatedText) {
-                    translationCache.set(cacheKey, translatedText);
-                    return translatedText;
-                }
-
-                return text;
+                const translatedText = data.data.translations[0].translatedText;
+                translationCache.set(cacheKey, translatedText);
+                return translatedText;
             } catch (error) {
                 console.error('Translation error:', error);
                 return text;
             }
         }
 
-        async function translateElement(element, targetLang) {
-            if (!element || 
-                element === document.getElementById('languageButtons') ||
-                element.tagName === 'SCRIPT' || 
-                element.tagName === 'STYLE' || 
-                element.hasAttribute('no-translate')) {
-                return;
-            }
-
-            // תרגום טקסט רגיל
-            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-            const textNodes = [];
-            let node;
-            
-            while (node = walker.nextNode()) {
-                const text = node.textContent.trim();
-                if (text) {
-                    textNodes.push(node);
-                }
-            }
-
-            for (const node of textNodes) {
-                const text = node.textContent.trim();
-                if (text) {
-                    const translated = await translateText(text, targetLang);
-                    if (translated !== text) {
-                        node.textContent = node.textContent.replace(text, translated);
-                    }
-                }
-            }
-
-            // תרגום תכונות
-            const attrs = ['placeholder', 'title', 'alt', 'aria-label'];
-            for (const attr of attrs) {
-                if (element.hasAttribute(attr)) {
-                    const text = element.getAttribute(attr);
-                    if (text) {
-                        const translated = await translateText(text, targetLang);
-                        element.setAttribute(attr, translated);
-                    }
-                }
-            }
-        }
-
+        // פונקציה לתרגום הדף
         async function translate(targetLang) {
             if (isTranslating) return;
-            
             isTranslating = true;
+
             const loadingIndicator = document.getElementById('loadingIndicator');
-            const buttons = document.querySelectorAll('.langBtn');
+            loadingIndicator.style.display = 'block';
 
             try {
-                // עדכון UI
-                buttons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.remove('active');
-                    if (btn.textContent.includes(targetLang)) {
-                        btn.classList.add('active');
+                const elements = document.querySelectorAll('#app *');
+                for (const element of elements) {
+                    if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
+                        const translatedText = await translateText(element.textContent, targetLang);
+                        element.textContent = translatedText;
                     }
-                });
-                
-                loadingIndicator.style.display = 'block';
-                document.documentElement.dir = targetLang === 'he' ? 'rtl' : 'ltr';
-
-                // תרגום
-                const app = document.getElementById('app');
-                if (app) {
-                    await translateElement(app, targetLang);
                 }
             } finally {
-                // החזרת UI למצב רגיל
-                buttons.forEach(btn => btn.disabled = false);
                 loadingIndicator.style.display = 'none';
                 isTranslating = false;
             }
         }
 
-        // מעקב אחר שינויים
-        const observer = new MutationObserver((mutations) => {
-            if (isTranslating) return;
-
-            const targetLang = document.documentElement.dir === 'rtl' ? 'he' : 'en';
-            mutations.forEach(mutation => {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            translateElement(node, targetLang);
-                        }
-                    });
-                }
-            });
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-
-        // אתחול
+        // תרגום אוטומטי בעת טעינת הדף
         document.addEventListener('DOMContentLoaded', () => {
-            const checkApp = setInterval(() => {
-                const app = document.getElementById('app');
-                if (app && app.children.length > 0) {
-                    clearInterval(checkApp);
-                    translate('he'); // תרגום ראשוני לעברית
-                }
-            }, 500);
-
-            setTimeout(() => clearInterval(checkApp), 30000);
+            const browserLang = detectBrowserLanguage();
+            const langMap = { he: 'he', en: 'en', ru: 'ru', it: 'it', es: 'es' };
+            const targetLang = langMap[browserLang.split('-')[0]] || 'en';
+            translate(targetLang);
         });
     </script>
 </body>
