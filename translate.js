@@ -1,5 +1,5 @@
 // Google Translate API Key
-const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס כאן את מפתח ה-API שלך
+const apiKey = AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg ; // הכנס כאן את מפתח ה-API שלך
 
 // פונקציה לתרגום טקסט בודד
 async function translateText(text, targetLanguage) {
