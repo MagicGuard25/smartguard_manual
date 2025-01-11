@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
+
+    <!-- קבצי CSS -->
     <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
     <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
     <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
@@ -36,7 +38,7 @@
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
     <style>
-        #languageButtons {
+        #languageMenu {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -44,33 +46,44 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 9999;
-            display: flex;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
             gap: 8px;
+            z-index: 1000;
         }
 
-        #languageButtons button {
+        #languageMenu.show {
+            display: flex;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .langButton {
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
             background: #f0f0f0;
             transition: all 0.3s;
         }
 
-        #languageButtons button:hover {
+        .langButton:hover {
             background: #4caf50;
             color: white;
         }
 
-        #languageButtons button.active {
-            background: #4caf50;
-            color: white;
-        }
-
-        .loading-indicator {
+        .loading {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -80,74 +93,101 @@
             padding: 20px;
             border-radius: 8px;
             display: none;
-            z-index: 10000;
+            z-index: 1002;
         }
     </style>
 </head>
 <body>
-    <!-- כפתורי בחירת שפה -->
-    <div id="languageButtons">
-        <button data-lang="en" onclick="changeLanguage('en')" class="active">English</button>
-        <button data-lang="he" onclick="changeLanguage('he')">עברית</button>
-        <button data-lang="ru" onclick="changeLanguage('ru')">Русский</button>
-        <button data-lang="it" onclick="changeLanguage('it')">Italiano</button>
-        <button data-lang="es" onclick="changeLanguage('es')">Español</button>
-    </div>
+    <noscript>
+        <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
 
-    <!-- אינדיקטור טעינה -->
-    <div class="loading-indicator" id="loadingIndicator">מתרגם...</div>
-
-    <!-- האלמנט המרכזי של האפליקציה -->
+    <!-- אפליקציית Vue -->
     <div id="app">
         <h1>Welcome to our website!</h1>
         <p>This is a sample page for demonstrating translation.</p>
     </div>
 
+    <!-- כפתורי בחירת שפה -->
+    <div id="languageMenu" class="show">
+        <button class="langButton" data-lang="en">English</button>
+        <button class="langButton" data-lang="he">עברית</button>
+        <button class="langButton" data-lang="ru">Русский</button>
+        <button class="langButton" data-lang="it">Italiano</button>
+        <button class="langButton" data-lang="es">Español</button>
+    </div>
+    <div class="loading" id="loadingIndicator">מתרגם...</div>
+
+    <!-- קבצי JS -->
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
     <script>
-        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס מפתח API
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס את מפתח ה-API שלך כאן
+        const translationCache = new Map();
         let currentLanguage = 'en';
+
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.classList.toggle('show');
+        }
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
+            if (translationCache.has(`${text}:${targetLang}`)) {
+                return translationCache.get(`${text}:${targetLang}`);
+            }
 
             const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
+                body: JSON.stringify({ q: text, target: targetLang })
             });
 
             if (!response.ok) throw new Error('Translation failed');
-            const data = await response.json();
-            return data.data.translations[0].translatedText;
+
+            const result = await response.json();
+            const translatedText = result.data.translations[0].translatedText;
+            translationCache.set(`${text}:${targetLang}`, translatedText);
+            return translatedText;
+        }
+
+        async function translateElement(element, targetLang) {
+            if (!element) return;
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                const text = node.textContent.trim();
+                if (text) {
+                    node.textContent = await translateText(text, targetLang);
+                }
+            }
         }
 
         async function translatePage(lang) {
             const loadingIndicator = document.getElementById('loadingIndicator');
             loadingIndicator.style.display = 'block';
 
-            const elements = document.querySelectorAll('#app *');
-            for (const element of elements) {
-                if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
-                    element.textContent = await translateText(element.textContent, lang);
-                }
-            }
+            const app = document.getElementById('app');
+            await translateElement(app, lang);
 
             loadingIndicator.style.display = 'none';
         }
 
-        function changeLanguage(lang) {
-            if (lang === currentLanguage) return;
-
-            document.querySelectorAll('#languageButtons button').forEach(button => {
-                button.classList.toggle('active', button.dataset.lang === lang);
+        function setupLanguageMenu() {
+            document.querySelectorAll('.langButton').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const lang = button.dataset.lang;
+                    currentLanguage = lang;
+                    toggleLanguageMenu();
+                    await translatePage(lang);
+                });
             });
-
-            currentLanguage = lang;
-            translatePage(lang);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupLanguageMenu();
+        });
     </script>
 </body>
 </html>
