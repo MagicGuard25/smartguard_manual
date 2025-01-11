@@ -11,10 +11,10 @@
     <!-- קבצי CSS -->
     <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
     <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
-    <link href="static/css/chunk-06c6c55e.6477bd25.css" rel="prefetch">
     <link href="static/css/chunk-0ad1966f.f6631c2e.css" rel="prefetch">
     <link href="static/css/chunk-1176cb8e.7dbc7ae3.css" rel="prefetch">
     <link href="static/css/chunk-12fd5eba.a21c779c.css" rel="prefetch">
+    <link href="static/css/chunk-4aef0516.6477bd25.css" rel="prefetch">
     <link href="static/css/chunk-5e572502.5e6bdd68.css" rel="prefetch">
     <link href="static/css/chunk-70060db0.f6631c2e.css" rel="prefetch">
     <link href="static/css/chunk-7398b612.c4a0cd01.css" rel="prefetch">
@@ -26,7 +26,6 @@
     <link href="static/css/chunk-a7c4b1c0.826d02ca.css" rel="prefetch">
     <link href="static/css/chunk-c008c720.c312a51e.css" rel="prefetch">
     <link href="static/css/chunk-c61f00f2.51283979.css" rel="prefetch">
-    <link href="static/css/chunk-c6baff6a.b0b4aff2.css" rel="prefetch">
     <link href="static/css/chunk-c7934cbc.3cd793e9.css" rel="prefetch">
     <link href="static/css/chunk-e11b8b12.c49fe662.css" rel="prefetch">
     <link href="static/css/chunk-e6f2f230.950fdf7a.css" rel="prefetch">
@@ -112,6 +111,7 @@
             z-index: 1002;
         }
     </style>
+
 </head>
 
 <body>
@@ -134,7 +134,7 @@
     <div id="app"></div>
 
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
-    <script src="static/js/app.edf7c9aa.js"></script>
+    <script src="static/js/app.36323100.js"></script>
 
     <script>
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
@@ -142,7 +142,8 @@
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
-            const cleanText = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+            const cleanText = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#39;/g, "'");
 
             try {
                 const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
@@ -176,16 +177,6 @@
                     node.textContent = await translateText(text, targetLang);
                 }
             }
-
-            const attributesToTranslate = ['title', 'placeholder', 'alt'];
-            attributesToTranslate.forEach(attr => {
-                if (element.hasAttribute(attr)) {
-                    const attrText = element.getAttribute(attr);
-                    if (attrText) {
-                        element.setAttribute(attr, translateText(attrText, targetLang));
-                    }
-                }
-            });
         }
 
         async function translatePage(lang) {
@@ -231,9 +222,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
-            observeDomChanges();
+            observeDomChanges(); // מעקב אחרי שינויים ב-DOM
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
-            translatePage(currentLanguage);
+            translatePage(currentLanguage); // תרגום ראשוני
         });
     </script>
 </body>
