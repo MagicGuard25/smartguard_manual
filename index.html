@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.8, maximum-scale=1, user-scalable=yes">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
     
@@ -42,7 +42,17 @@
         <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
+    <!-- אפליקציית Vue -->
     <div id="app"></div>
+
+    <!-- כפתורי שפה -->
+    <div id="language-buttons" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background-color: white; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <button data-lang="en" style="margin: 5px; padding: 5px;">English</button>
+        <button data-lang="he" style="margin: 5px; padding: 5px;">עברית</button>
+        <button data-lang="it" style="margin: 5px; padding: 5px;">Italiano</button>
+        <button data-lang="ru" style="margin: 5px; padding: 5px;">Русский</button>
+        <button data-lang="es" style="margin: 5px; padding: 5px;">Español</button>
+    </div>
 
     <!-- קבצי JavaScript -->
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
@@ -72,5 +82,8 @@
     <link href="static/js/chunk-e11b8b12.b18dc983.js" rel="prefetch">
     <link href="static/js/chunk-e6f2f230.8084a38d.js" rel="prefetch">
     <link href="static/js/chunk-ec85e9da.2b79db67.js" rel="prefetch">
+
+    <!-- טעינת קובץ התרגום -->
+    <script src="translate.js"></script>
 </body>
 </html>
