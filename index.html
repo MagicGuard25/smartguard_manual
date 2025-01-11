@@ -55,9 +55,16 @@
     <link href="static/js/chunk-e11b8b12.b18dc983.js" rel="prefetch">
     <link href="static/js/chunk-e6f2f230.8084a38d.js" rel="prefetch">
     <link href="static/js/chunk-ec85e9da.2b79db67.js" rel="prefetch">
-    
-     <style>
-        /* עיצוב התפריט */
+
+    <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
+    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
+    <link href="static/js/app.36323100.js" rel="preload" as="script">
+    <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
+
+    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
+    <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
+
+    <style>
         #languageMenu {
             position: fixed;
             top: 45px;
@@ -96,21 +103,20 @@
             border-radius: 20px;
             cursor: pointer;
             background: #f0f0f0;
-            color: #000; /* צבע טקסט שחור */
+            color: black;
             transition: all 0.3s;
         }
 
         .langButton:hover {
-            background: #d3d3d3; /* צבע רקע אפור בריחוף */
-            color: black; /* שמירת צבע טקסט שחור */
+            background: #d3d3d3;
         }
 
         #toggleMenu {
             position: fixed;
-            top: 5px; /* העלאת הכפתור למעלה */
-            right: 60px; /* הזזת הכפתור שמאלה */
-            background: #333; /* צבע שחור-אפור */
-            color: white; /* צבע הטקסט נשאר לבן */
+            top: 5px;
+            right: 60px;
+            background: #333;
+            color: white;
             border: none;
             border-radius: 20px;
             padding: 8px 20px;
@@ -131,7 +137,6 @@
             z-index: 1002;
         }
     </style>
-
 </head>
 
 <body>
@@ -162,8 +167,6 @@
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
-            const cleanText = text.replace(/&quot;/g, '"').replace(/&amp;/g, '&'); // החלפת מרכאות ותווים מיוחדים
-
             try {
                 const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
                     method: 'POST',
@@ -171,7 +174,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        q: cleanText,
+                        q: text,
                         target: targetLang,
                         format: 'html'
                     })
@@ -198,14 +201,12 @@
             }
 
             const attributesToTranslate = ['title', 'placeholder', 'alt'];
-            attributesToTranslate.forEach(attr => {
+            for (const attr of attributesToTranslate) {
                 if (element.hasAttribute(attr)) {
                     const attrText = element.getAttribute(attr);
-                    if (attrText) {
-                        element.setAttribute(attr, translateText(attrText, targetLang));
-                    }
+                    element.setAttribute(attr, await translateText(attrText, targetLang));
                 }
-            });
+            }
         }
 
         async function translatePage(lang) {
@@ -230,11 +231,11 @@
         function observeDomChanges() {
             const observer = new MutationObserver(mutations => {
                 mutations.forEach(async mutation => {
-                    mutation.addedNodes.forEach(async node => {
+                    for (const node of mutation.addedNodes) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             await translateElement(node, currentLanguage);
                         }
-                    });
+                    }
                 });
             });
 
@@ -251,11 +252,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
-            observeDomChanges(); // מעקב אחרי שינויים ב-DOM
+            observeDomChanges();
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
-            translatePage(currentLanguage); // תרגום ראשוני
+            translatePage(currentLanguage);
         });
     </script>
 </body>
-
 </html>
