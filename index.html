@@ -1,41 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.8,maximum-scale=1,user-scalable=yes">
     <link rel="icon" href="favicon.ico">
     <title>vue3</title>
-    <link href="static/css/chunk-039261d5.1c90cdbf.css" rel="prefetch">
-    <link href="static/css/chunk-05ced2b6.51ecfa54.css" rel="prefetch">
-    <!-- ... שאר ה-prefetch של קבצי CSS ... -->
+
+    <!-- קבצי סגנון -->
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
-    <link href="static/js/app.36323100.js" rel="preload" as="script">
-    <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
-    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
+    <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
+    
+    <!-- כל שאר קבצי ה-CSS וה-JS -->
+    <!-- ... -->
 </head>
 <body>
     <noscript>
-        <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        <strong>אנו מצטערים, אך vue3 לא עובד כראוי ללא JavaScript מופעל. אנא הפעל אותו כדי להמשיך.</strong>
     </noscript>
     <div id="app"></div>
+    
+    <!-- קבצי JavaScript -->
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
     <!-- סקריפט התרגום -->
     <script>
-        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // יש להחליף עם המפתח האמיתי שלך
-
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // החלף עם המפתח שלך
+        const translationCache = new Map();
+        
+        // פונקציה לתרגום טקסט
         async function translateText(text) {
-            if (!text || !text.trim()) return text;
+            if (!text || !text.trim() || text.length < 2) return text;
+            
+            // בדיקת מטמון
+            const cacheKey = text;
+            if (translationCache.has(cacheKey)) {
+                return translationCache.get(cacheKey);
+            }
 
             const params = new URLSearchParams({
                 key: apiKey,
                 q: text,
-                target: 'en',
-                source: 'zh'
+                target: 'iw', // קוד שפה לעברית
+                source: 'zh' // קוד שפה לסינית
             });
 
             try {
@@ -50,95 +60,152 @@
                 }
 
                 const data = await response.json();
-                return data.data?.translations?.[0]?.translatedText || text;
+                const translatedText = data.data?.translations?.[0]?.translatedText || text;
+                
+                // שמירה במטמון
+                translationCache.set(cacheKey, translatedText);
+                
+                return translatedText;
             } catch (error) {
                 console.error('Translation error:', error);
                 return text;
             }
         }
 
+        // פונקציית עזר לבדיקה אם טקסט מכיל סינית
+        function containsChinese(text) {
+            return /[\u4E00-\u9FFF]/.test(text);
+        }
+
+        // פונקציה לתרגום אלמנט
         async function translateElement(element) {
-            if (!element || element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
+            if (!element || element.hasAttribute('translated') || 
+                element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
                 return;
             }
 
-            // תרגום טקסט באלמנט הנוכחי
-            for (const node of element.childNodes) {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const text = node.textContent.trim();
-                    if (text) {
-                        const translatedText = await translateText(text);
-                        if (translatedText !== text) {
-                            node.textContent = node.textContent.replace(text, translatedText);
-                        }
-                    }
+            // תרגום תוכן טקסט
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+            let node;
+            
+            while (node = walker.nextNode()) {
+                const text = node.textContent.trim();
+                if (text && containsChinese(text)) {
+                    textNodes.push(node);
                 }
             }
+
+            // תרגום כל הטקסטים במקביל
+            const translations = await Promise.all(
+                textNodes.map(async node => {
+                    const text = node.textContent.trim();
+                    return translateText(text);
+                })
+            );
+
+            textNodes.forEach((node, index) => {
+                node.textContent = translations[index];
+            });
 
             // תרגום תכונות
             const attrs = ['placeholder', 'title', 'alt', 'aria-label'];
             for (const attr of attrs) {
                 if (element.hasAttribute(attr)) {
                     const text = element.getAttribute(attr);
-                    if (text) {
-                        element.setAttribute(attr, await translateText(text));
+                    if (text && containsChinese(text)) {
+                        const translated = await translateText(text);
+                        element.setAttribute(attr, translated);
                     }
                 }
             }
 
-            // תרגום תתי-אלמנטים
-            for (const child of element.children) {
-                await translateElement(child);
-            }
+            // סימון שהאלמנט תורגם
+            element.setAttribute('translated', 'true');
         }
 
-        // פונקציה המחפשת שינויים בתוכן
+        // פונקציה למעקב אחר שינויים
         function observeChanges() {
             const observer = new MutationObserver((mutations) => {
-                mutations.forEach(async (mutation) => {
+                const changedElements = new Set();
+                
+                mutations.forEach(mutation => {
                     if (mutation.type === 'childList') {
-                        mutation.addedNodes.forEach(async (node) => {
+                        mutation.addedNodes.forEach(node => {
                             if (node.nodeType === Node.ELEMENT_NODE) {
-                                await translateElement(node);
+                                changedElements.add(node);
                             }
                         });
                     }
                 });
+
+                if (changedElements.size > 0) {
+                    changedElements.forEach(element => {
+                        translateElement(element);
+                    });
+                }
             });
 
             observer.observe(document.body, {
                 childList: true,
-                subtree: true
+                subtree: true,
+                attributes: false,
+                characterData: false
             });
         }
 
+        // פונקציה לתרגום כל הדף
+        async function translatePage() {
+            const elements = document.querySelectorAll('*:not([translated])');
+            const chunks = [];
+            const chunkSize = 10;
+            
+            for (let i = 0; i < elements.length; i += chunkSize) {
+                chunks.push(Array.from(elements).slice(i, i + chunkSize));
+            }
+
+            for (const chunk of chunks) {
+                await Promise.all(chunk.map(element => translateElement(element)));
+                // המתנה קצרה בין צ'אנקים כדי לא להעמיס על ה-API
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+
         // אתחול התרגום
+        let translationInterval;
+        
         async function initTranslation() {
             // המתנה לטעינת האפליקציה
-            const waitForApp = setInterval(async () => {
+            translationInterval = setInterval(async () => {
                 const app = document.getElementById('app');
                 if (app && app.children.length > 0) {
-                    clearInterval(waitForApp);
+                    clearInterval(translationInterval);
                     
-                    // תרגום התוכן הראשוני
-                    await translateElement(app);
+                    // תרגום ראשוני
+                    await translatePage();
                     
                     // הגדרת מעקב אחר שינויים
                     observeChanges();
+                    
+                    // תרגום תקופתי לתפיסת תוכן שהוחמץ
+                    setInterval(translatePage, 5000);
                 }
             }, 500);
 
-            // הפסקת הבדיקה אחרי 30 שניות
-            setTimeout(() => clearInterval(waitForApp), 30000);
+            // הפסקת הבדיקה אחרי דקה
+            setTimeout(() => {
+                if (translationInterval) {
+                    clearInterval(translationInterval);
+                }
+            }, 60000);
         }
 
         // הפעלה כשהדף נטען
-        document.addEventListener('DOMContentLoaded', initTranslation);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTranslation);
+        } else {
+            initTranslation();
+        }
     </script>
-
-    <!-- Prefetch של קבצי JavaScript -->
-    <link href="static/js/chunk-039261d5.2abaea03.js" rel="prefetch">
-    <link href="static/js/chunk-05ced2b6.9bc49b43.js" rel="prefetch">
-    <!-- ... שאר ה-prefetch של קבצי JavaScript ... -->
 </body>
 </html>
