@@ -11,7 +11,7 @@ async function translateText(text, targetLanguage) {
             body: JSON.stringify({
                 q: text,
                 target: targetLanguage,
-                source: 'en' // שפת המקור (אנגלית)
+                source: 'en' // שפת המקור
             })
         });
 
@@ -30,27 +30,24 @@ async function translateText(text, targetLanguage) {
 
 // פונקציה לתרגום כל הטקסטים בדף
 async function translatePage(targetLanguage) {
-    const elements = document.querySelectorAll('[data-translate]');
+    const elements = $('[data-translate]'); // שימוש ב-jQuery כדי לבחור את האלמנטים
     for (const element of elements) {
-        const originalText = element.getAttribute('data-translate'); // מזהה הטקסט
+        const originalText = $(element).attr('data-translate'); // מזהה הטקסט
         const translatedText = await translateText(originalText, targetLanguage);
-        element.textContent = translatedText; // עדכון הטקסט המתורגם
+        $(element).text(translatedText); // עדכון הטקסט המתורגם
     }
 }
 
 // פונקציה לחיבור כפתורי השפות
 function setupLanguageButtons() {
-    const buttons = document.querySelectorAll('#language-buttons button');
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            const language = button.getAttribute('data-lang'); // שפת היעד
-            translatePage(language); // קריאה לפונקציית התרגום
-        });
+    $('#language-buttons button').on('click', async function () {
+        const language = $(this).attr('data-lang'); // שפת היעד
+        await translatePage(language); // קריאה לפונקציית התרגום
     });
 }
 
-// הפעלת הפונקציות בזמן טעינת הדף
-window.onload = async () => {
-    setupLanguageButtons();
-    await translatePage('en'); // תרגום ברירת מחדל לאנגלית
-};
+// תרגום ברירת מחדל לאנגלית בזמן טעינת הדף
+$(document).ready(async function () {
+    setupLanguageButtons(); // מחבר את הכפתורים
+    await translatePage('en'); // ברירת מחדל לאנגלית
+});
