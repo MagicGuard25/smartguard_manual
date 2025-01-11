@@ -115,6 +115,7 @@
     <script>
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
         let currentLanguage = 'en';
+        let isDragging = false;
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
@@ -188,13 +189,14 @@
         }
 
         function toggleLanguageMenu() {
-            const menu = document.getElementById('languageMenu');
-            menu.classList.toggle('show');
+            if (!isDragging) {
+                const menu = document.getElementById('languageMenu');
+                menu.classList.toggle('show');
+            }
         }
 
         function makeButtonDraggable() {
             const button = document.getElementById('toggleMenu');
-            let isDragging = false;
             let offsetX, offsetY;
 
             const startDrag = (e) => {
