@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -36,12 +36,27 @@
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
-     <style>
+    <style>
+    /* עיצוב הכפתור להצגת תפריט השפות */
+    #toggleMenu {
+        position: fixed;
+        top: 10px; /* שינוי: הועלה למעלה */
+        right: 20px; /* שינוי: הוזז שמאלה */
+        background: #333; /* צבע שחור-אפור */
+        color: white; /* צבע הטקסט נשאר לבן */
+        border: none;
+        border-radius: 20px;
+        padding: 8px 20px;
+        cursor: pointer;
+        z-index: 1001;
+        font-size: 14px; /* לשיפור נראות */
+    }
+
     /* עיצוב התפריט */
     #languageMenu {
         position: fixed;
         top: 50px;
-        right: 6px;
+        right: 20px; /* שינוי: התאם לכפתור */
         background: white;
         border: 1px solid #ccc;
         border-radius: 8px;
@@ -63,7 +78,6 @@
             opacity: 0;
             transform: translateY(-5px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
@@ -83,19 +97,6 @@
     .langButton:hover {
         background: #d3d3d3; /* צבע רקע אפור בריחוף */
         color: black; /* שמירת צבע טקסט שחור */
-    }
-
-    #toggleMenu {
-        position: fixed;
-        top: 15px;
-        right: 10px;
-        background: #333; /* צבע שחור-אפור */
-        color: white; /* צבע הטקסט נשאר לבן */
-        border: none;
-        border-radius: 20px;
-        padding: 8px 20px;
-        cursor: pointer;
-        z-index: 1001;
     }
 
     .loading {
@@ -119,10 +120,8 @@
         <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
-    <!-- כפתור להצגת תפריט השפות -->
     <button id="toggleMenu">Language</button>
 
-    <!-- תפריט שפה -->
     <div id="languageMenu">
         <button class="langButton" data-lang="en">English</button>
         <button class="langButton" data-lang="he">עברית</button>
@@ -138,87 +137,88 @@
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
-   <script>
-    const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס את מפתח ה-API שלך כאן
-    let currentLanguage = 'en';
+    <script>
+        const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
+        let currentLanguage = 'en';
 
-    async function translateText(text, targetLang) {
-        if (!text.trim()) return text;
-        const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                q: text,
-                target: targetLang
-            })
-        });
-        if (!response.ok) throw new Error('Translation failed');
-        const result = await response.json();
-        return result.data.translations[0].translatedText;
-    }
+        async function translateText(text, targetLang) {
+            if (!text.trim()) return text;
+            const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    q: text,
+                    source: 'zh', // שפת מקור מוגדרת
+                    target: targetLang,
+                    format: 'html'
+                })
+            });
+            if (!response.ok) throw new Error('Translation failed');
+            const result = await response.json();
+            return result.data.translations[0].translatedText;
+        }
 
-    async function translateElement(element, targetLang) {
-        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-        let node;
-        while ((node = walker.nextNode())) {
-            const text = node.textContent.trim();
-            if (text) {
-                node.textContent = await translateText(text, targetLang);
+        async function translateElement(element, targetLang) {
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                const text = node.textContent.trim();
+                if (text) {
+                    node.textContent = await translateText(text, targetLang);
+                }
             }
         }
-    }
 
-    async function translatePage(lang) {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        loadingIndicator.style.display = 'block';
-        const app = document.getElementById('app');
-        if (app) await translateElement(app, lang);
-        loadingIndicator.style.display = 'none';
-    }
+        async function translatePage(lang) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'block';
+            const app = document.getElementById('app');
+            if (app) await translateElement(app, lang);
+            loadingIndicator.style.display = 'none';
+        }
 
-    function setupLanguageMenu() {
-        document.querySelectorAll('.langButton').forEach(button => {
-            button.addEventListener('click', async () => {
-                const lang = button.dataset.lang;
-                currentLanguage = lang;
-                toggleLanguageMenu();
-                await translatePage(lang);
-            });
-        });
-    }
-
-    function observeDomChanges() {
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(async mutation => {
-                mutation.addedNodes.forEach(async node => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        await translateElement(node, currentLanguage);
-                    }
+        function setupLanguageMenu() {
+            document.querySelectorAll('.langButton').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const lang = button.dataset.lang;
+                    currentLanguage = lang;
+                    toggleLanguageMenu();
+                    await translatePage(lang);
                 });
             });
+        }
+
+        function observeDomChanges() {
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(async mutation => {
+                    mutation.addedNodes.forEach(async node => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            await translateElement(node, currentLanguage);
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.classList.toggle('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupLanguageMenu();
+            observeDomChanges();
+            document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
+            translatePage(currentLanguage);
         });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    }
-
-    function toggleLanguageMenu() {
-        const menu = document.getElementById('languageMenu');
-        menu.classList.toggle('show');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        setupLanguageMenu();
-        observeDomChanges(); // מעקב אחרי שינויים ב-DOM
-        document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
-        translatePage(currentLanguage); // תרגום ראשוני
-    });
-</script>
-
+    </script>
 </body>
 
 </html>
