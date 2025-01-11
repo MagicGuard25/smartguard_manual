@@ -36,7 +36,7 @@
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
-    <style>
+     <style>
         #languageMenu {
             position: fixed;
             top: 50px;
@@ -125,11 +125,7 @@
     <script>
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg'; // הכנס את מפתח ה-API שלך כאן
         let currentLanguage = 'en';
-
-        function toggleLanguageMenu() {
-            const menu = document.getElementById('languageMenu');
-            menu.classList.toggle('show');
-        }
+        let lastUrl = location.href;
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
@@ -163,7 +159,7 @@
             const loadingIndicator = document.getElementById('loadingIndicator');
             loadingIndicator.style.display = 'block';
             const app = document.getElementById('app');
-            await translateElement(app, lang);
+            if (app) await translateElement(app, lang);
             loadingIndicator.style.display = 'none';
         }
 
@@ -178,20 +174,23 @@
             });
         }
 
-        function observePageChanges() {
-            const observer = new MutationObserver(() => {
-                translatePage(currentLanguage);
-            });
+        function observeUrlChanges() {
+            setInterval(() => {
+                if (location.href !== lastUrl) {
+                    lastUrl = location.href;
+                    translatePage(currentLanguage); // תרגום מחדש כשיש שינוי ב-URL
+                }
+            }, 500);
+        }
 
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.classList.toggle('show');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
-            observePageChanges();
+            observeUrlChanges();
             document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
             translatePage(currentLanguage); // תרגום ראשוני
         });
