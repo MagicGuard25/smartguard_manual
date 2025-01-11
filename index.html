@@ -33,10 +33,6 @@
             user-select: none;
         }
 
-        #toggleMenu.draggable {
-            position: absolute;
-        }
-
         #languageMenu {
             position: fixed;
             top: 110px;
@@ -201,43 +197,34 @@
             let isDragging = false;
             let offsetX, offsetY;
 
-            button.addEventListener('mousedown', (e) => {
+            const startDrag = (e) => {
+                e.preventDefault();
                 isDragging = true;
-                offsetX = e.clientX - button.getBoundingClientRect().left;
-                offsetY = e.clientY - button.getBoundingClientRect().top;
-                button.classList.add('draggable');
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                button.style.left = `${e.clientX - offsetX}px`;
-                button.style.top = `${e.clientY - offsetY}px`;
-            });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-                button.classList.remove('draggable');
-            });
-
-            button.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                const touch = e.touches[0];
+                const touch = e.touches ? e.touches[0] : e;
                 offsetX = touch.clientX - button.getBoundingClientRect().left;
                 offsetY = touch.clientY - button.getBoundingClientRect().top;
-                button.classList.add('draggable');
-            });
+                document.body.style.touchAction = 'none';
+            };
 
-            document.addEventListener('touchmove', (e) => {
+            const drag = (e) => {
                 if (!isDragging) return;
-                const touch = e.touches[0];
+                const touch = e.touches ? e.touches[0] : e;
                 button.style.left = `${touch.clientX - offsetX}px`;
                 button.style.top = `${touch.clientY - offsetY}px`;
-            });
+            };
 
-            document.addEventListener('touchend', () => {
+            const endDrag = () => {
                 isDragging = false;
-                button.classList.remove('draggable');
-            });
+                document.body.style.touchAction = '';
+            };
+
+            button.addEventListener('mousedown', startDrag);
+            button.addEventListener('mousemove', drag);
+            button.addEventListener('mouseup', endDrag);
+
+            button.addEventListener('touchstart', startDrag);
+            button.addEventListener('touchmove', drag);
+            button.addEventListener('touchend', endDrag);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
