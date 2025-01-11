@@ -30,24 +30,27 @@ async function translateText(text, targetLanguage) {
 
 // פונקציה לתרגום כל הטקסטים בדף
 async function translatePage(targetLanguage) {
-    const elements = $('[data-translate]'); // שימוש ב-jQuery כדי לבחור את האלמנטים
+    const elements = document.querySelectorAll('[data-translate]'); // בוחרים את כל האלמנטים עם data-translate
     for (const element of elements) {
-        const originalText = $(element).attr('data-translate'); // מזהה הטקסט
+        const originalText = element.getAttribute('data-translate'); // מזהה הטקסט
         const translatedText = await translateText(originalText, targetLanguage);
-        $(element).text(translatedText); // עדכון הטקסט המתורגם
+        element.textContent = translatedText; // מעדכנים את הטקסט המתורגם
     }
 }
 
 // פונקציה לחיבור כפתורי השפות
 function setupLanguageButtons() {
-    $('#language-buttons button').on('click', async function () {
-        const language = $(this).attr('data-lang'); // שפת היעד
-        await translatePage(language); // קריאה לפונקציית התרגום
+    const buttons = document.querySelectorAll('#language-buttons button');
+    buttons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const language = button.getAttribute('data-lang'); // שפת היעד
+            await translatePage(language); // קריאה לפונקציית התרגום
+        });
     });
 }
 
 // תרגום ברירת מחדל לאנגלית בזמן טעינת הדף
-$(document).ready(async function () {
+window.onload = async () => {
     setupLanguageButtons(); // מחבר את הכפתורים
-    await translatePage('en'); // ברירת מחדל לאנגלית
-});
+    await translatePage('en'); // תרגום ברירת מחדל לאנגלית
+};
