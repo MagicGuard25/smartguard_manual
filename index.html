@@ -32,8 +32,6 @@
     <link href="static/css/chunk-ec85e9da.15134b5c.css" rel="prefetch">
     <link href="static/css/app.a26d5cbe.css" rel="preload" as="style">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="preload" as="style">
-    <link href="static/js/app.36323100.js" rel="preload" as="script">
-    <link href="static/js/chunk-vendors.111f4aba.js" rel="preload" as="script">
     <link href="static/css/chunk-vendors.4f0bdeee.css" rel="stylesheet">
     <link href="static/css/app.a26d5cbe.css" rel="stylesheet">
 
@@ -45,8 +43,8 @@
             background: white;
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 10px;
             display: none;
             flex-direction: column;
             gap: 8px;
@@ -83,6 +81,19 @@
             color: white;
         }
 
+        #toggleMenu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
         .loading {
             position: fixed;
             top: 50%;
@@ -102,23 +113,22 @@
         <strong>We're sorry but vue3 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
 
-    <!-- אפליקציית Vue -->
-    <div id="app">
-        <h1>Welcome to our website!</h1>
-        <p>This is a sample page for demonstrating translation.</p>
-    </div>
+    <!-- כפתור להצגת תפריט השפות -->
+    <button id="toggleMenu">בחר שפה</button>
 
-    <!-- כפתורי בחירת שפה -->
-    <div id="languageMenu" class="show">
+    <!-- תפריט שפה -->
+    <div id="languageMenu">
         <button class="langButton" data-lang="en">English</button>
         <button class="langButton" data-lang="he">עברית</button>
         <button class="langButton" data-lang="ru">Русский</button>
         <button class="langButton" data-lang="it">Italiano</button>
         <button class="langButton" data-lang="es">Español</button>
     </div>
+
     <div class="loading" id="loadingIndicator">מתרגם...</div>
 
-    <!-- קבצי JS -->
+    <div id="app"></div>
+
     <script src="static/js/chunk-vendors.111f4aba.js"></script>
     <script src="static/js/app.36323100.js"></script>
 
@@ -187,6 +197,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLanguageMenu();
+            document.getElementById('toggleMenu').addEventListener('click', toggleLanguageMenu);
+            translatePage(currentLanguage); // תרגום ראשוני
         });
     </script>
 </body>
