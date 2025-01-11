@@ -116,6 +116,8 @@
         const apiKey = 'AIzaSyB70xFVF0-huiWyPSlniSkb8J1LK-0tGeg';
         let currentLanguage = 'en';
         let isDragging = false;
+        let dragThreshold = 10; // Threshold to differentiate between drag and click
+        let startX, startY;
 
         async function translateText(text, targetLang) {
             if (!text.trim()) return text;
@@ -200,33 +202,44 @@
             let offsetX, offsetY;
 
             const startDrag = (e) => {
-                e.preventDefault();
-                isDragging = true;
                 const touch = e.touches ? e.touches[0] : e;
+                startX = touch.clientX;
+                startY = touch.clientY;
+                isDragging = false;
+
                 offsetX = touch.clientX - button.getBoundingClientRect().left;
                 offsetY = touch.clientY - button.getBoundingClientRect().top;
                 document.body.style.touchAction = 'none';
+
+                button.addEventListener('mousemove', drag);
+                button.addEventListener('mouseup', endDrag);
+                button.addEventListener('touchmove', drag);
+                button.addEventListener('touchend', endDrag);
             };
 
             const drag = (e) => {
-                if (!isDragging) return;
                 const touch = e.touches ? e.touches[0] : e;
+                const dx = Math.abs(touch.clientX - startX);
+                const dy = Math.abs(touch.clientY - startY);
+                if (dx > dragThreshold || dy > dragThreshold) {
+                    isDragging = true;
+                }
+                if (!isDragging) return;
+
                 button.style.left = `${touch.clientX - offsetX}px`;
                 button.style.top = `${touch.clientY - offsetY}px`;
             };
 
             const endDrag = () => {
-                isDragging = false;
                 document.body.style.touchAction = '';
+                button.removeEventListener('mousemove', drag);
+                button.removeEventListener('mouseup', endDrag);
+                button.removeEventListener('touchmove', drag);
+                button.removeEventListener('touchend', endDrag);
             };
 
             button.addEventListener('mousedown', startDrag);
-            button.addEventListener('mousemove', drag);
-            button.addEventListener('mouseup', endDrag);
-
             button.addEventListener('touchstart', startDrag);
-            button.addEventListener('touchmove', drag);
-            button.addEventListener('touchend', endDrag);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
