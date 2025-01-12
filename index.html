@@ -12,51 +12,51 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(to bottom, #6a11cb, #2575fc);
             font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
         }
 
-        .container {
+        .login-container {
             text-align: center;
-            background: white;
+            background-color: #fff;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        h1 {
+        .login-container h1 {
             margin-bottom: 20px;
-            font-size: 24px;
             color: #333;
         }
 
-        button {
+        .login-button {
             padding: 10px 20px;
-            font-size: 16px;
+            background-color: #007bff;
             color: white;
-            background-color: #2575fc;
             border: none;
             border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #1a5bcc;
+        .login-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Welcome</h1>
-        <button onclick="redirectToPage()">Enter</button>
+    <div class="login-container">
+        <h1>Login</h1>
+        <!-- כפתור כניסה -->
+        <button class="login-button" onclick="redirectToHome()">Enter</button>
     </div>
 
     <script>
-        function redirectToPage() {
-            // כתובת הדף שאליו תועבר
-            window.location.href = "https://magicguard25.github.io/smartguard_manual/";
+        // פונקציה להפניה לעמוד הבית
+        function redirectToHome() {
+            window.location.href = "home.html";
         }
     </script>
 </body>
