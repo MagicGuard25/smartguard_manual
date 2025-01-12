@@ -48,7 +48,7 @@
 
 <body>
     <div class="login-container">
-        <h1>Login</h1>
+        <h1>Smart Guard</h1>
         <!-- כפתור כניסה -->
         <button class="login-button" onclick="redirectToHome()">Enter</button>
     </div>
@@ -60,5 +60,65 @@
         }
     </script>
 </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
 
+         .login-container {
+    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-left: 150px; /* מוסיף מרווח שמאלי */
+        }
+
+        .login-container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h1>Magic manager</h1>
+        <!-- כפתור כניסה -->
+        <button class="login-button" onclick="redirectToHome()">Enter</button>
+    </div>
+
+    <script>
+        // פונקציה להפניה לעמוד הבית
+        function redirectToHome() {
+            window.location.href = "home.html";
+        }
+    </script>
+</body>
+  
 </html>
