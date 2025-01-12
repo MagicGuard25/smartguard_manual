@@ -29,6 +29,19 @@
             color: #333;
         }
 
+        .login-button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .login-button-container img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
         .login-button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -38,7 +51,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin: 10px;
+            margin: 10px 0;
         }
 
         .login-button:hover {
@@ -51,9 +64,15 @@
     <div class="login-container">
         <h1>Login</h1>
         <!-- כפתור כניסה לעמוד פנימי -->
-        <button class="login-button" onclick="redirectToHome()">Smart guard</button>
+        <div class="login-button-container">
+            <img src="9T.png" alt="Smart Guard Icon">
+            <button class="login-button" onclick="redirectToHome()">Smart guard</button>
+        </div>
         <!-- כפתור כניסה לקישור חיצוני -->
-        <button class="login-button" onclick="redirectToExternal()">Magic manager</button>
+        <div class="login-button-container">
+            <img src="9T.png" alt="Magic Manager Icon">
+            <button class="login-button" onclick="redirectToExternal()">Magic manager</button>
+        </div>
     </div>
 
     <script>
