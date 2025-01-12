@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #6a11cb, #2575fc);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #2575fc;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1a5bcc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <button onclick="redirectToPage()">Enter</button>
+    </div>
+
+    <script>
+        function redirectToPage() {
+            // כתובת הדף שאליו תועבר
+            window.location.href = "https://magicguard25.github.io/smartguard_manual/";
+        }
+    </script>
+</body>
+
+</html>
